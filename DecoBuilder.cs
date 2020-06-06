@@ -1,77 +1,54 @@
 
 using System;
 using System.Collections.Generic;
-using Parkitect.Mods.AssetPacks;
 using UnityEngine;
 
 namespace Parkitilities
 {
-    public class DecoBuilder<T> : IRecolorable<DecoBuilder<T>>, IBaseBuilder<T> where T : Deco
+    public class DecoBuilder<T> : BaseBuilder<T>, IRecolorable<DecoBuilder<T>> where T : Deco
     {
-        private Color[] _colors = { };
+        public static readonly String SETUP = "SETUP";
+        public static readonly String CONFIGURATION = "CONFIGURATION";
 
-        private bool _isLightOnAtNight;
-        private int _nightColorSlots = -1;
-
-        private List<Bounds> _bounds = new List<Bounds>();
-        private float _price;
-        private bool _canBeRefunded = false;
-        private bool _isStatic = true;
-        private String _displayName = "";
-        private String _guid = null;
+        public static readonly String SET_GUID = "SET_GUID";
         private GameObject _go = null;
 
-        private List<Func<Deco,bool>> _toApply = new List<Func<Deco,bool>>();
-
-        public DecoBuilder(GameObject go, String guid)
+        public DecoBuilder(GameObject go)
         {
             _go = go;
-            _guid = guid;
+        }
+
+        public DecoBuilder<T> Id(String id)
+        {
+            AddStep(CONFIGURATION,SET_GUID, (deco) =>
+            {
+                deco.name = id;
+                return "Set Guid: " + deco.name;
+            });
+            return this;
         }
 
 
         public DecoBuilder<T> DisplayName(String name)
         {
-            _displayName = name;
-            return this;
-        }
-
-        public DecoBuilder<T> AddComponent<TComponent>() where TComponent : Component
-        {
-            _toApply.Add(deco => {
-                deco.gameObject.AddComponent<TComponent>();
-                return true;
+            AddStep(CONFIGURATION,"SetDisplayName", (deco) =>
+            {
+                deco.setDisplayName(name);
+                return "Set Display Name: " + name;
             });
             return this;
         }
-
-        // public DecoBuilder(Asset asset)
-        // {
-        //
-        //     if (asset.CustomColors != null)
-        //     {
-        //         Color[] c1 = new Color[asset.CustomColors.Count];
-        //         for (var i = 0; i < asset.CustomColors.Count; i++)
-        //         {
-        //             c1[i] = new Color(asset.CustomColors[i].Red, asset.CustomColors[i].Green,
-        //                 asset.CustomColors[i].Blue, asset.CustomColors[i].Alpha);
-        //         }
-        //
-        //
-        //         CustomColor(c1);
-        //
-        //         SetLightEffects(asset.LightsTurnOnAtNight, asset.LightsUseCustomColors);
-        //         SetLightColorSlot(asset.LightsCustomColorSlot);
-        //         SetDisplayName(asset.Name);
-        //         SetPrice(asset.Price);
-        //     }
-        // }
 
         public DecoBuilder<T> EnableLightsOnAtNight
         {
             get
             {
-                _isLightOnAtNight = true;
+                RemoveByTag("AddLightController");
+                AddStep(SETUP, "AddLightController", (deco) =>
+                {
+                    deco.gameObject.AddComponent<LightController>();
+                    return "Added LightController";
+                });
                 return this;
             }
         }
@@ -80,94 +57,112 @@ namespace Parkitilities
         {
             get
             {
-                _isLightOnAtNight = false;
+                RemoveByTag("AddLightController");
                 return this;
             }
         }
 
         public DecoBuilder<T> NightColorSlot(int slot)
         {
-            _nightColorSlots = slot;
+            AddStep(CONFIGURATION, (deco) =>
+            {
+                LightController controller = deco.gameObject.GetComponent<LightController>();
+                if (controller != null)
+                {
+                    controller.useCustomColors = true;
+                    controller.customColorSlot = slot;
+                    return "Enable Night Color for slot " + slot;
+                }
+
+                return "Object Does not have LightController";
+            });
             return this;
         }
 
 
         public DecoBuilder<T> Price(float price)
         {
-            _price = price;
+            AddStep(CONFIGURATION, (deco) =>
+            {
+                deco.price = price;
+                return "Set Price to: " + price;
+            });
             return this;
         }
 
 
         public DecoBuilder<T> CustomColor(Color c1)
         {
-            _colors = new[] {c1};
-            return this;
+            return CustomColor(new[] {c1});
         }
 
         public DecoBuilder<T> CustomColor(Color c1, Color c2)
         {
-            _colors = new[] {c1, c2};
-            return this;
+            return CustomColor(new[] {c1, c2});
         }
 
         public DecoBuilder<T> CustomColor(Color c1, Color c2, Color c3)
         {
-            _colors = new[] {c1, c2, c3};
-            return this;
+            return CustomColor(new[] {c1, c2, c3});
         }
 
         public DecoBuilder<T> CustomColor(Color c1, Color c2, Color c3, Color c4)
         {
-            _colors = new[] {c1, c2, c3, c4};
-            return this;
+            return CustomColor(new[] {c1, c2, c3, c4});
         }
 
         public DecoBuilder<T> CustomColor(Color[] colors)
         {
-            int count = colors.Length > 4 ? 4 : colors.Length;
-            _colors = new Color[count];
-            for (var x = 0; x < count; x++)
+
+            RemoveByTag("AddCustomColors");
+            AddStep(SETUP, "AddColorComponent", (deco) =>
             {
-                _colors[x] = colors[x];
-            }
+                deco.gameObject.AddComponent<CustomColors>();
+                return "Add Custom Color Component";
+            });
 
+            AddStep(CONFIGURATION, "SetCustomColors", (deco) =>
+            {
+                CustomColors customColors = deco.GetComponent<CustomColors>();
+                customColors.setColors(colors);
+                return "Set Custom Colors to: " + colors;
+            });
             return this;
         }
 
-        public DecoBuilder<T> SetLightColorSlot(int slot)
+        public DecoBuilder<T> ClearBoundingBox()
         {
-            _nightColorSlots = slot;
+            RemoveByTag("AddBoundingBox");
             return this;
         }
+
 
         public DecoBuilder<T> AddBoundingBox(Bounds bound)
         {
-            _bounds.Add(bound);
+            AddStep(SETUP, "AddBoundingBox", (deco) =>
+            {
+                BoundingBox b = deco.gameObject.AddComponent<BoundingBox>();
+                b.setBounds(bound);
+                b.layers = BoundingVolume.Layers.Buildvolume;
+
+                return "Add Bounding Box " + bound;
+            });
             return this;
         }
 
-        public T Build(AssetManagerLoader loader)
+        public override T Build(AssetManagerLoader loader)
         {
-            GameObject go = UnityEngine.Object.Instantiate(Go);
+            if (!ContainsTag(SET_GUID))
+                throw new Exception("Guid is never set");
 
+
+            GameObject go = UnityEngine.Object.Instantiate(_go);
             T deco = go.AddComponent<T>();
-
-            //add re-color
-            Parkitility.ApplyRecolorable(_colors, go);
-
-            if (_isLightOnAtNight)
+            ApplyGroup(SETUP, deco);
+            ApplyGroup(CONFIGURATION, deco);
+            foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
-                LightController lightController = go.AddComponent<LightController>();
-                // lightController.useCustomColors = _useNightColorSlot;
-                lightController.customColorSlot = _nightColorSlots;
-            }
-
-            foreach (var box in _bounds)
-            {
-                BoundingBox b = go.AddComponent<BoundingBox>();
-                b.setBounds(box);
-                b.layers = BoundingVolume.Layers.Buildvolume;
+                Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
             }
 
             List<Transform> transforms = new List<Transform>();
@@ -177,19 +172,10 @@ namespace Parkitilities
                 Parkitility.OnlyActiveInBuildMode(transform.gameObject);
             }
 
-            foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
-            {
-                Parkitility.ReplaceParkitectMaterial(componentsInChild);
-            }
-
-            deco.price = _price;
-            deco.canBeRefunded = _canBeRefunded;
-            deco.isStatic = _isStatic;
-            deco.isPreview = true;
             deco.dontSerialize = true;
-            deco.setDisplayName(_displayName);
+            deco.isPreview = true;
+            deco.isStatic = true;
 
-            loader.RegisterObject(deco);
             return deco;
         }
     }

@@ -57,14 +57,24 @@ namespace Parkitilities
             go.AddComponent<OnlyActiveInBuildMode>();
         }
 
-        public static DecoBuilder<TDeco> FromDeco<TDeco>(GameObject go, String name, String guid) where TDeco : Deco
+        public static DecoBuilder<TDeco> Create<TDeco>(GameObject go) where TDeco : Deco
         {
-            return new DecoBuilder<TDeco>(go, name, guid);
+            return new DecoBuilder<TDeco>(go);
         }
 
-        public static DecoBuilder<TDeco> FromDeco<TDeco>(Asset asset)  where TDeco : Deco
+        public static DecoBuilder<TDeco> Create<TDeco>(GameObject go, Asset asset)  where TDeco : Deco
         {
-            return new DecoBuilder<TDeco>(null,null,null);
+            Color[] colors = new Color[asset.CustomColors.Count];
+            for (int x = 0; x < asset.CustomColors.Count; x++)
+            {
+                colors[x] = new Color(asset.CustomColors[x].Red,asset.CustomColors[x].Green,asset.CustomColors[x].Blue,asset.CustomColors[x].Alpha);
+            }
+
+            return Create<TDeco>(go)
+                .Id(asset.Guid)
+                .DisplayName(asset.Name)
+                .Price(asset.Price)
+                .CustomColor(colors);
         }
 
         public static VehicleBuilder<TVehicle> FromVehicle<TVehicle>() where TVehicle : Vehicle
