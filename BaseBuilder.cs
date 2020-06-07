@@ -5,22 +5,33 @@ using UnityEngine;
 
 namespace Parkitilities
 {
-    public abstract class BaseBuilder<T>
+    public static class BaseBuilderLiterals
+    {
+
+        public const String FIND_ATTACH_COMPONENT = "FIND_ATTACH_COMPONENT";
+    }
+
+    public abstract class BaseBuilder<TPayload>
     {
         protected struct Operation
         {
             public String Group;
             public String Tag;
             public int Priority;
-            public Func<T, String> Handler;
+            public Action<TPayload> Handler;
         }
+
+        public static String FindAttachComponentTag(String beginWith)
+        {
+            return BaseBuilderLiterals.FIND_ATTACH_COMPONENT + "_" + beginWith;
+        }
+
         private readonly List<Operation> _toApply = new List<Operation>();
         private int _idx = 0;
 
+        private readonly HashSet<String> _tags = new HashSet<string>();
 
-        private HashSet<String> _tags = new HashSet<string>();
-
-        protected void RemoveByTag(String tag)
+        public void RemoveByTag(String tag)
         {
             if (_tags.Contains(tag))
             {
@@ -29,7 +40,21 @@ namespace Parkitilities
             }
         }
 
-        protected void AddStep(String group, Func<T, String> handler)
+        public bool ContainsTag(String tag)
+        {
+            return _tags.Contains(tag);
+        }
+
+        protected void AddOrReplaceByTag(String group, String tag, Action<TPayload> handler)
+        {
+            if (ContainsTag(tag))
+            {
+                RemoveByTag(tag);
+            }
+            AddStep(group, handler);
+        }
+
+        protected void AddStep(String group, Action<TPayload> handler)
         {
             _toApply.Add(new Operation()
             {
@@ -39,9 +64,8 @@ namespace Parkitilities
             });
         }
 
-        protected void AddStep(String group, String tag, Func<T, String> handler)
+        protected void AddStep(String group, String tag, Action<TPayload> handler)
         {
-
             _tags.Add(tag);
             _toApply.Add(new Operation()
             {
@@ -52,34 +76,20 @@ namespace Parkitilities
             });
         }
 
-        protected IOrderedEnumerable<Operation> IterGroup(String group) {
+        protected IOrderedEnumerable<Operation> IterGroup(String group)
+        {
             return _toApply.FindAll((t) => t.Group.Equals(group)).OrderBy(t => t.Priority);
         }
 
-        protected bool ContainsTag(String tag)
+        protected bool ApplyGroup(String group, TPayload target)
         {
-            return _tags.Contains(tag);
-        }
-
-
-        protected bool ApplyGroup(String group, T target)
-        {
+            Debug.Log("=== " + group + " ===");
             foreach (var op in IterGroup(group))
             {
-                Debug.Log("=== " + group + " ===");
-                try
-                {
-                    Debug.Log(op.Handler(target));
-                }
-                catch (Exception ex)
-                {
-                    return false;
-                }
+                op.Handler(target);
             }
 
             return true;
         }
-
-        public abstract T Build(AssetManagerLoader loader);
     }
 }

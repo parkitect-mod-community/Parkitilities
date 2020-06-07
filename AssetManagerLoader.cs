@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -8,6 +7,7 @@ namespace Parkitilities
     public class AssetManagerLoader
     {
         private List<SerializedMonoBehaviour> _behaviours = new List<SerializedMonoBehaviour>();
+        private List<ReferenceableScriptableObject> _scriptable = new List<ReferenceableScriptableObject>();
         private GameObject _hider = new GameObject("Hider");
 
         public void HideGo(GameObject go)
@@ -20,6 +20,12 @@ namespace Parkitilities
         {
             ScriptableSingleton<AssetManager>.Instance.registerObject(behaviour);
             _behaviours.Add(behaviour);
+        }
+
+        public void RegisterObject(ReferenceableScriptableObject scriptableObject)
+        {
+            ScriptableSingleton<AssetManager>.Instance.registerObject(scriptableObject);
+            _scriptable.Add(scriptableObject);
         }
 
         public void Unload()

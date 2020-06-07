@@ -2,179 +2,332 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Parkitilities
 {
-    public class DecoBuilder<T> : BaseBuilder<T>, IRecolorable<DecoBuilder<T>> where T : Deco
+    public struct DecoContainer<T>
     {
-        public static readonly String SETUP = "SETUP";
-        public static readonly String CONFIGURATION = "CONFIGURATION";
+        public T Deco;
+        public GameObject Go;
+    }
 
-        public static readonly String SET_GUID = "SET_GUID";
-        private GameObject _go = null;
+    public static class DecoBuilderLiterals
+    {
+        public const String SETUP_GROUP = "SETUP";
+        public const String CONFIGURATION_GROUP = "CONFIGURATION";
+    }
 
+    public class DecoBuilder<TResult> : BaseBuilder<DecoContainer<TResult>>, IBuildable<TResult>, IComponentUtilities<DecoBuilder<TResult>>, IRecolorable<DecoBuilder<TResult>> where TResult : Deco
+    {
+
+        private readonly GameObject _go = null;
         public DecoBuilder(GameObject go)
         {
             _go = go;
         }
 
-        public DecoBuilder<T> Id(String id)
+
+        public DecoBuilder<TResult> Resizable(float min, float max)
         {
-            AddStep(CONFIGURATION,SET_GUID, (deco) =>
+            AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP, "RESIZABLE", (payload) =>
             {
-                deco.name = id;
-                return "Set Guid: " + deco.name;
+                if (!payload.Go.TryGetComponent<CustomSize>(out var component))
+                {
+                    component = payload.Go.AddComponent<CustomSize>();
+                }
+
+                component.minSize = min;
+                component.maxSize = max;
+            });
+            return this;
+        }
+
+        public DecoBuilder<TResult> NotResizable {
+            get
+            {
+                AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP, "RESIZABLE", (payload) =>
+                {
+                    if (payload.Go.TryGetComponent<CustomSize>(out var component))
+                    {
+                        Object.Destroy(component);
+                    }
+                });
+                return this;
+            }
+
+        }
+
+        public DecoBuilder<TResult> Id(String id)
+        {
+            AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP,"GUID", (payload) =>
+            {
+                payload.Go.name = id;
             });
             return this;
         }
 
 
-        public DecoBuilder<T> DisplayName(String name)
-        {
-            AddStep(CONFIGURATION,"SetDisplayName", (deco) =>
+        public DecoBuilder<TResult> SeeThrough {
+            get
             {
-                deco.setDisplayName(name);
-                return "Set Display Name: " + name;
-            });
-            return this;
+                AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP, "SEE_THROUGH", (payload) =>
+                {
+                    payload.Deco.canSeeThrough = true;
+                });
+
+                return this;
+            }
         }
 
-        public DecoBuilder<T> EnableLightsOnAtNight
+        public DecoBuilder<TResult> CantSeeThrough {
+            get
+            {
+                AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP,"SEE_THROUGH", (payload) =>
+                {
+                    payload.Deco.canSeeThrough = false;
+                });
+
+                return this;
+            }
+        }
+
+        public DecoBuilder<TResult> BlockRain
         {
             get
             {
-                RemoveByTag("AddLightController");
-                AddStep(SETUP, "AddLightController", (deco) =>
+                AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP,"BLOCK_RAIN", (payload) =>
                 {
-                    deco.gameObject.AddComponent<LightController>();
-                    return "Added LightController";
+                    payload.Deco.canBlockRain = true;
+                });
+
+                return this;
+            }
+        }
+
+        public DecoBuilder<TResult> DisableBlockRain
+        {
+            get
+            {
+                AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP,"BLOCK_RAIN", (payload) =>
+                {
+                    payload.Deco.canBlockRain = false;
                 });
                 return this;
             }
         }
 
-        public DecoBuilder<T> DisableLightsOnAtNight
+
+        public DecoBuilder<TResult> Group(String group, String subGroup = "")
+        {
+            AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP,"GROUP", (payload) =>
+            {
+                if (String.IsNullOrEmpty(subGroup))
+                {
+                    payload.Deco.categoryTag = group;
+                }
+                else
+                {
+                    payload.Deco.categoryTag = group + "/" + subGroup;
+                }
+
+            });
+            return this;
+        }
+
+        public DecoBuilder<TResult> DisplayName(String name)
+        {
+            AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP, "DISPLAY",(payload) =>
+            {
+                payload.Deco.setDisplayName(name);
+            });
+            return this;
+        }
+
+        public DecoBuilder<TResult> EnableLightsOnAtNight
         {
             get
             {
-                RemoveByTag("AddLightController");
+                AddOrReplaceByTag(DecoBuilderLiterals.SETUP_GROUP, "LIGHTS_ON_NIGHT", (payload) =>
+                {
+                    if (payload.Go.GetComponent<LightController>() == null)
+                    {
+                        payload.Go.AddComponent<LightController>();
+                    }
+                });
+
                 return this;
             }
         }
 
-        public DecoBuilder<T> NightColorSlot(int slot)
+        public DecoBuilder<TResult> DisableLightsOnAtNight
         {
-            AddStep(CONFIGURATION, (deco) =>
+            get
             {
-                LightController controller = deco.gameObject.GetComponent<LightController>();
+                AddOrReplaceByTag(DecoBuilderLiterals.SETUP_GROUP, "LIGHTS_ON_NIGHT", (payload) =>
+                {
+                    foreach (var controller in payload.Go.GetComponents<LightController>())
+                    {
+                        Object.Destroy(controller);
+                    }
+                });
+                return this;
+            }
+        }
+
+        public DecoBuilder<TResult> NightColorSlot(int slot)
+        {
+            AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP,"NIGHT_SLOT", (payload) =>
+            {
+                LightController controller = payload.Go.GetComponent<LightController>();
                 if (controller != null)
                 {
                     controller.useCustomColors = true;
                     controller.customColorSlot = slot;
-                    return "Enable Night Color for slot " + slot;
                 }
-
-                return "Object Does not have LightController";
             });
             return this;
         }
 
 
-        public DecoBuilder<T> Price(float price)
+        public DecoBuilder<TResult> Price(float price)
         {
-            AddStep(CONFIGURATION, (deco) =>
+            AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP, "PRICE", (payload) =>
             {
-                deco.price = price;
-                return "Set Price to: " + price;
+                payload.Deco.price = price;
             });
             return this;
         }
 
 
-        public DecoBuilder<T> CustomColor(Color c1)
+        public DecoBuilder<TResult> CustomColor(Color c1)
         {
             return CustomColor(new[] {c1});
         }
 
-        public DecoBuilder<T> CustomColor(Color c1, Color c2)
+        public DecoBuilder<TResult> CustomColor(Color c1, Color c2)
         {
             return CustomColor(new[] {c1, c2});
         }
 
-        public DecoBuilder<T> CustomColor(Color c1, Color c2, Color c3)
+        public DecoBuilder<TResult> CustomColor(Color c1, Color c2, Color c3)
         {
             return CustomColor(new[] {c1, c2, c3});
         }
 
-        public DecoBuilder<T> CustomColor(Color c1, Color c2, Color c3, Color c4)
+        public DecoBuilder<TResult> CustomColor(Color c1, Color c2, Color c3, Color c4)
         {
             return CustomColor(new[] {c1, c2, c3, c4});
         }
 
-        public DecoBuilder<T> CustomColor(Color[] colors)
+        public DecoBuilder<TResult> CustomColor(Color[] colors)
         {
-
-            RemoveByTag("AddCustomColors");
-            AddStep(SETUP, "AddColorComponent", (deco) =>
+            AddOrReplaceByTag(DecoBuilderLiterals.SETUP_GROUP, "SETUP_CUSTOM_COLOR", (payload) =>
             {
-                deco.gameObject.AddComponent<CustomColors>();
-                return "Add Custom Color Component";
+                if (payload.Go.GetComponent<CustomColors>() == null) {
+                    payload.Go.AddComponent<CustomColors>();
+                }
             });
 
-            AddStep(CONFIGURATION, "SetCustomColors", (deco) =>
+            AddOrReplaceByTag(DecoBuilderLiterals.CONFIGURATION_GROUP, "CUSTOM_COLOR", (payload) =>
             {
-                CustomColors customColors = deco.GetComponent<CustomColors>();
+                CustomColors customColors = payload.Go.GetComponent<CustomColors>();
                 customColors.setColors(colors);
-                return "Set Custom Colors to: " + colors;
             });
             return this;
         }
 
-        public DecoBuilder<T> ClearBoundingBox()
+        public DecoBuilder<TResult> DisableCustomColors
         {
-            RemoveByTag("AddBoundingBox");
-            return this;
+            get
+            {
+                AddOrReplaceByTag(DecoBuilderLiterals.SETUP_GROUP, "SETUP_CUSTOM_COLOR",
+                    (payload) =>
+                    {
+                        foreach (var comp in payload.Go.GetComponents<CustomColors>()) {
+                            Object.Destroy(comp);
+                        }
+                    });
+                RemoveByTag("CUSTOM_COLOR");
+                return this;
+            }
         }
 
-
-        public DecoBuilder<T> AddBoundingBox(Bounds bound)
+        public DecoBuilder<TResult> AddBoundingBox(Bounds bound, BoundingVolume.Layers layers = BoundingVolume.Layers.Buildvolume)
         {
-            AddStep(SETUP, "AddBoundingBox", (deco) =>
+            AddStep(DecoBuilderLiterals.SETUP_GROUP, "BOUNDING_BOX", (payload) =>
             {
-                BoundingBox b = deco.gameObject.AddComponent<BoundingBox>();
+                BoundingBox b = payload.Go.AddComponent<BoundingBox>();
                 b.setBounds(bound);
-                b.layers = BoundingVolume.Layers.Buildvolume;
-
-                return "Add Bounding Box " + bound;
+                b.layers = layers;
             });
             return this;
         }
 
-        public override T Build(AssetManagerLoader loader)
+        public DecoBuilder<TResult> ClearBoundingBoxes
         {
-            if (!ContainsTag(SET_GUID))
-                throw new Exception("Guid is never set");
+            get
+            {
+                AddOrReplaceByTag(DecoBuilderLiterals.SETUP_GROUP, "BOUNDING_BOX", (payload) =>
+                {
+                    foreach (var comp in payload.Go.GetComponents<BoundingBox>()) {
+                        Object.Destroy(comp);
+                    }
+                });
+                return this;
+            }
+        }
 
+        public DecoBuilder<TResult> FindAndAttachComponent<TTarget>(String beginWith, String tag) where TTarget : Component
+        {
+            AddStep(DecoBuilderLiterals.SETUP_GROUP,tag, (payload) =>
+            {
+                List<Transform> transforms = new List<Transform>();
+                Utility.recursiveFindTransformsStartingWith(beginWith, payload.Go.transform, transforms);
+                foreach (var transform in transforms)
+                {
+                    transform.gameObject.AddComponent<TTarget>();
+                }
 
+            });
+            return this;
+        }
+
+        public DecoBuilder<TResult> FindAndAttachComponent<TTarget>(String beginWith) where TTarget : Component
+        {
+            return FindAndAttachComponent<TTarget>(beginWith, FindAttachComponentTag(beginWith));
+        }
+
+        public TResult Build(AssetManagerLoader loader)
+        {
             GameObject go = UnityEngine.Object.Instantiate(_go);
-            T deco = go.AddComponent<T>();
-            ApplyGroup(SETUP, deco);
-            ApplyGroup(CONFIGURATION, deco);
-            foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
+            if (!go.TryGetComponent<TResult>(out var deco)) // existing Decos are not evaluated. Assumed to be configured correctly
             {
-                Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
+                deco = go.AddComponent<TResult>();
+                if (!ContainsTag("GUID"))
+                    throw new Exception("Guid is never set");
             }
 
-            List<Transform> transforms = new List<Transform>();
-            Utility.recursiveFindTransformsStartingWith("BuildMode", go.transform, transforms);
-            foreach (var transform in transforms)
+            DecoContainer<TResult> dc = new DecoContainer<TResult>()
             {
-                Parkitility.OnlyActiveInBuildMode(transform.gameObject);
-            }
+                Deco = deco,
+                Go = go
+            };
 
-            deco.dontSerialize = true;
-            deco.isPreview = true;
-            deco.isStatic = true;
+            try
+            {
+                ApplyGroup(DecoBuilderLiterals.SETUP_GROUP, dc);
+                ApplyGroup(DecoBuilderLiterals.CONFIGURATION_GROUP, dc);
+                foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
+                {
+                    Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                // ignored
+            }
 
             return deco;
         }

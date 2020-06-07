@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Parkitilities
 {
-    public class EntertainerBuilder<T> : IBaseBuilder<T>
+    public class EntertainerBuilder<T> : BaseBuilder<T>, IBuildable<T>
     {
         public T Build(AssetManagerLoader loader)
         {

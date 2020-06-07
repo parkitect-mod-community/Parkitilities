@@ -52,17 +52,13 @@ namespace Parkitilities
             }
         }
 
-        public static void OnlyActiveInBuildMode(GameObject go)
+        public static DecoBuilder<TDeco> CreateDefault<TDeco>(GameObject go) where TDeco : Deco
         {
-            go.AddComponent<OnlyActiveInBuildMode>();
+            return new DecoBuilder<TDeco>(go)
+                .FindAndAttachComponent<OnlyActiveInBuildMode>("BuildMode", DecoBuilderLiterals.FIND_ATTACH_COMPONENT_BUILDMODE);
         }
 
-        public static DecoBuilder<TDeco> Create<TDeco>(GameObject go) where TDeco : Deco
-        {
-            return new DecoBuilder<TDeco>(go);
-        }
-
-        public static DecoBuilder<TDeco> Create<TDeco>(GameObject go, Asset asset)  where TDeco : Deco
+        public static DecoBuilder<TDeco> CreateDefault<TDeco>(GameObject go, Asset asset)  where TDeco : Deco
         {
             Color[] colors = new Color[asset.CustomColors.Count];
             for (int x = 0; x < asset.CustomColors.Count; x++)
@@ -70,7 +66,7 @@ namespace Parkitilities
                 colors[x] = new Color(asset.CustomColors[x].Red,asset.CustomColors[x].Green,asset.CustomColors[x].Blue,asset.CustomColors[x].Alpha);
             }
 
-            return Create<TDeco>(go)
+            return CreateDefault<TDeco>(go)
                 .Id(asset.Guid)
                 .DisplayName(asset.Name)
                 .Price(asset.Price)
