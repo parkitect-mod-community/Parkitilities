@@ -5,14 +5,9 @@ using Object = UnityEngine.Object;
 
 namespace Parkitilities.PathAttachmentBuilder
 {
-    public static class BasePathAttachmentLiteral
-    {
-        public const String SetupGroup = "SETUP";
-        public const String ConfigurationGroup = "CONFIGURATION";
-    }
 
     public abstract class BasePathAttachment<TContainer, TResult, TSelf> : BaseBuilder<TContainer>, IComponentUtilities<TSelf>,
-        IRecolorable<TSelf>, IBoundedBoxes<TSelf>
+        IRecolorable<TSelf>, IBoundedBoxes<TSelf>, IBuildable<TResult>
         where TSelf : class
         where TContainer : BaseObjectContainer<TResult>
         where TResult : PathAttachment
@@ -39,25 +34,22 @@ namespace Parkitilities.PathAttachmentBuilder
 
         public TSelf CustomColor(Color[] colors)
         {
-            AddOrReplaceByTag(BasePathAttachmentLiteral.SetupGroup, "SETUP_CUSTOM_COLOR", (payload) =>
+            AddStep("CUSTOM_COLOR", (payload) =>
             {
-                if (payload.Go.GetComponent<CustomColors>() == null)
+                if (!payload.Go.TryGetComponent<CustomColors>(out var component))
                 {
-                    payload.Go.AddComponent<CustomColors>();
+                    component = payload.Go.AddComponent<CustomColors>();
                 }
-            });
 
-            AddOrReplaceByTag(BasePathAttachmentLiteral.ConfigurationGroup, "CUSTOM_COLOR", (payload) =>
-            {
-                CustomColors customColors = payload.Go.GetComponent<CustomColors>();
-                customColors.setColors(colors);
+                component.setColors(colors);
             });
             return this as TSelf;
         }
 
         public TSelf DisableCustomColors()
         {
-            AddOrReplaceByTag(BasePathAttachmentLiteral.SetupGroup, "SETUP_CUSTOM_COLOR",
+            RemoveAllStepsByTag("CUSTOM_COLOR");
+            AddStep("CUSTOM_COLOR",
                 (payload) =>
                 {
                     foreach (var comp in payload.Go.GetComponents<CustomColors>())
@@ -65,13 +57,12 @@ namespace Parkitilities.PathAttachmentBuilder
                         Object.Destroy(comp);
                     }
                 });
-            RemoveByTag("CUSTOM_COLOR");
             return this as TSelf;
         }
 
         public TSelf FindAndAttachComponent<TTarget>(string beginWith) where TTarget : Component
         {
-            AddStep(BasePathAttachmentLiteral.SetupGroup, (payload) =>
+            AddStep( (payload) =>
             {
                 List<Transform> transforms = new List<Transform>();
                 Utility.recursiveFindTransformsStartingWith(beginWith, payload.Go.transform, transforms);
@@ -87,7 +78,7 @@ namespace Parkitilities.PathAttachmentBuilder
 
         public TSelf AddBoundingBox(Bounds bound, BoundingVolume.Layers layers = BoundingVolume.Layers.Buildvolume)
         {
-            AddStep(BasePathAttachmentLiteral.SetupGroup, "BOUNDING_BOX", (payload) =>
+            AddStep( "BOUNDING_BOX", (payload) =>
             {
                 BoundingBox b = payload.Go.AddComponent<BoundingBox>();
                 b.setBounds(bound);
@@ -98,7 +89,8 @@ namespace Parkitilities.PathAttachmentBuilder
 
         public TSelf ClearBoundingBoxes()
         {
-            AddOrReplaceByTag(BasePathAttachmentLiteral.SetupGroup, "BOUNDING_BOX", (payload) =>
+            RemoveAllStepsByTag("BOUNDING_BOX");
+            AddStep("BOUNDING_BOX", (payload) =>
             {
                 foreach (var comp in payload.Go.GetComponents<BoundingBox>())
                 {
@@ -107,5 +99,7 @@ namespace Parkitilities.PathAttachmentBuilder
             });
             return this as TSelf;
         }
+
+        public abstract TResult Build(AssetManagerLoader loader);
     }
 }

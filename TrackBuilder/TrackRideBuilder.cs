@@ -5,54 +5,57 @@ using UnityEngine;
 namespace Parkitilities
 {
 
-    public static class TrackBuilderLiterals
-    {
-        public const String SetupGroup = "SETUP";
-        public const String ConfigurationGroup = "CONFIGURATION";
-        public const String PostConfigurationGroup = "POST_CONFIGURATION";
-    }
 
 
-    public class TrackRideBuilder<TResult>: BaseBuilder<BaseObjectContainer<TResult>>, IApply<TResult>, IBuildable<TResult> where TResult: TrackedRide
+    public class TrackRideBuilder<TResult> : BaseBuilder<BaseObjectContainer<TResult>>, IApply<TResult>,
+        IBuildable<TResult> where TResult : TrackedRide
     {
         private GameObject _go;
+
+
 
         public TrackRideBuilder(GameObject go)
         {
             _go = go;
         }
 
-        public TrackRideBuilder<TResult> Generator<TMeshGenerator>(TMeshGenerator generator)
+        public class TrackMeshGeneratorBuilderTrackRide<TResult, TFrom> : TrackMeshGeneratorBuilder<TResult>
+            where TResult : MeshGenerator
+        {
+            private readonly TFrom _from;
+
+            public TrackMeshGeneratorBuilderTrackRide(TFrom from)
+            {
+                this._from = from;
+            }
+
+            public TFrom End()
+            {
+                return _from;
+            }
+        }
+
+
+        public TrackMeshGeneratorBuilderTrackRide<TMeshGenerator,TrackRideBuilder<TResult>> Generator<TMeshGenerator>()
             where TMeshGenerator : MeshGenerator
         {
-            AddOrReplaceByTag(TrackBuilderLiterals.SetupGroup, "MESH_GENERATOR", (handler) =>
-            {
-                handler.Target.meshGenerator = generator;
-            });
-            return this;
+            var target = new TrackMeshGeneratorBuilderTrackRide<TMeshGenerator,TrackRideBuilder<TResult>>(this);
+            AddStep("MESH_GENERATOR", (handler) => { handler.Target.meshGenerator = target.Build(handler.Loader,handler.Target); });
+            return target;
         }
 
-        public TrackRideBuilder<TResult> Generator<TMeshGenerator>(IBuildable<TMeshGenerator> generator,
-            AssetManagerLoader loader)
-            where TMeshGenerator : MeshGenerator
-        {
-            AddOrReplaceByTag(TrackBuilderLiterals.SetupGroup, "MESH_GENERATOR",
-                (handler) => { handler.Target.meshGenerator = generator.Build(loader); });
-            return this;
-        }
+        // public TrackRideBuilder<TResult> MeshGenerator<TMeshGenerator>(IBuildable<TMeshGenerator> generator)
+        //     where TMeshGenerator : MeshGenerator
+        // {
+        //     AddStep("MESH_GENERATOR",
+        //         (handler) => { handler.Target.meshGenerator = generator.Build(handler.Loader); });
+        //     return this;
+        // }
 
-        public TrackRideBuilder<TResult> Support<TSupport>(TSupport support) where TSupport : SupportInstantiator
+        public TrackRideBuilder<TResult> AddTrain<TTrain>(AssetManagerLoader loader, IBuildable<TTrain> train)
+            where TTrain : CoasterCarInstantiator
         {
-            AddOrReplaceByTag(TrackBuilderLiterals.ConfigurationGroup, "SUPPORT", (handler) =>
-            {
-                handler.Target.meshGenerator.supportInstantiator = support;
-            });
-            return this;
-        }
-
-        public TrackRideBuilder<TResult> AddTrain<TTrain>(AssetManagerLoader loader,IBuildable<TTrain> train) where TTrain : CoasterCarInstantiator
-        {
-            AddStep(TrackBuilderLiterals.PostConfigurationGroup, "ADD_TRAIN", (handler) =>
+            AddStep("ADD_TRAIN", (handler) =>
             {
                 TTrain target = train.Build(loader);
                 if (handler.Target.carTypes == null)
@@ -75,7 +78,7 @@ namespace Parkitilities
         /// <returns></returns>
         public TrackRideBuilder<TResult> CanChangeLaps(bool state, int defaultLaps = 1)
         {
-            AddOrReplaceByTag(TrackBuilderLiterals.ConfigurationGroup, "CAN_CHANGE_LAPS", (handler) =>
+            AddStep("CAN_CHANGE_LAPS", (handler) =>
             {
                 handler.Target.canChangeLaps = state;
                 handler.Target.defaultLaps = defaultLaps;
@@ -85,24 +88,23 @@ namespace Parkitilities
 
         public TrackRideBuilder<TResult> CanCrashFromCollision(bool state)
         {
-            AddOrReplaceByTag(TrackBuilderLiterals.ConfigurationGroup, "CAN_CRASH_FROM_COLLISION",
+            AddStep("CAN_CRASH_FROM_COLLISION",
                 (handler) => { handler.Target.canCrashFromCollisions = state; });
             return this;
         }
 
-        public TrackRideBuilder<TResult> AddTrain<TTrain>(TTrain train) where TTrain : CoasterCarInstantiator
+        public TrackRideBuilder<TResult> AddTrain<TTrain>(IBuildable<TTrain> train) where TTrain : CoasterCarInstantiator
         {
-
-            AddStep(TrackBuilderLiterals.PostConfigurationGroup, "ADD_TRAIN", (handler) =>
+            AddStep("ADD_TRAIN", (handler) =>
             {
                 if (handler.Target.carTypes == null)
                 {
-                    handler.Target.carTypes = new CoasterCarInstantiator[] {train};
+                    handler.Target.carTypes = new CoasterCarInstantiator[] {train.Build(handler.Loader)};
                 }
                 else
                 {
                     Array.Resize(ref handler.Target.carTypes, handler.Target.carTypes.Length + 1);
-                    handler.Target.carTypes[handler.Target.carTypes.Length - 1] = train;
+                    handler.Target.carTypes[handler.Target.carTypes.Length - 1] = train.Build(handler.Loader);
                 }
             });
             return this;

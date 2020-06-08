@@ -23,14 +23,8 @@ namespace Parkitilities
                     throw new Exception("Guid is never set");
             }
 
-            BaseObjectContainer<TResult> dc = new BaseObjectContainer<TResult>()
-            {
-                Go = go,
-                Target = vehicle
-            };
 
-            ApplyGroup(DecoBuilderLiterals.SetupGroup, dc);
-            ApplyGroup(DecoBuilderLiterals.ConfigurationGroup, dc);
+            Apply(new BaseObjectContainer<TResult>(loader,vehicle,go));
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);

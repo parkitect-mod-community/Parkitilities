@@ -1,26 +1,38 @@
-using System;
 using UnityEngine;
 
 namespace Parkitilities
 {
-    public static class TrackMeshGeneratorBuilderLiteral
+    public class TrackRideObjectContainer<TResult> : BaseObjectContainer<TResult>
     {
-        public const String CONFIGURATION_GROUP = "CONFIGURATION";
+        public TrackRideObjectContainer(AssetManagerLoader loader, TResult target, GameObject go) : base(loader, target, go)
+        {
+        }
     }
 
-    public class TrackMeshGeneratorBuilder<TResult> : BaseBuilder<BaseObjectContainer<TResult>>, IBuildable<TResult>
-        where TResult : MeshGenerator
+    public class TrackMeshGeneratorBuilder<TResult> : BaseBuilder<BaseObjectContainer<TResult>>,
+        IBuildable<TResult,TrackedRide> where TResult : MeshGenerator
     {
+
         public TrackMeshGeneratorBuilder<TResult> CrossBeam(GameObject gameObject)
         {
-            AddOrReplaceByTag(TrackMeshGeneratorBuilderLiteral.CONFIGURATION_GROUP, "CROSS_BEAM",
+            AddStep("CROSS_BEAM",
                 (handler) => { handler.Target.crossBeamGO = gameObject; });
+            return this;
+        }
+
+        public TrackMeshGeneratorBuilder<TResult> Support<TSupport>()
+            where TSupport : SupportInstantiator
+        {
+            AddStep("SUPPORT", (handler) =>
+            {
+                //handler.Target.supportInstantiator = support;
+            });
             return this;
         }
 
         public TrackMeshGeneratorBuilder<TResult> FrictionWheel(GameObject gameObject)
         {
-            AddOrReplaceByTag(TrackMeshGeneratorBuilderLiteral.CONFIGURATION_GROUP, "FRICTION_WHEEL",
+            AddStep("FRICTION_WHEEL",
                 (handler) => { handler.Target.crossBeamGO = gameObject; });
             return this;
         }
@@ -28,7 +40,7 @@ namespace Parkitilities
         public TrackMeshGeneratorBuilder<TResult> LsmFins(GameObject gameObject)
         {
 
-            AddOrReplaceByTag(TrackMeshGeneratorBuilderLiteral.CONFIGURATION_GROUP, "LSM_FIN",
+            AddStep("LSM_FIN",
                 (handler) => { handler.Target.lsmFinGO = gameObject; });
             return this;
         }
@@ -36,21 +48,22 @@ namespace Parkitilities
         public TrackMeshGeneratorBuilder<TResult> StationHandRail(GameObject gameObject)
         {
 
-            AddOrReplaceByTag(TrackMeshGeneratorBuilderLiteral.CONFIGURATION_GROUP, "STATION_HAND_RAIL",
+            AddStep("STATION_HAND_RAIL",
                 (handler) => { handler.Target.stationHandRailGO = gameObject; });
             return this;
         }
 
         public TrackMeshGeneratorBuilder<TResult> StationPlatform(StationPlatform platform)
         {
-            AddOrReplaceByTag(TrackMeshGeneratorBuilderLiteral.CONFIGURATION_GROUP, "STATION_HAND_RAIL",
+            AddStep("STATION_HAND_RAIL",
                 (handler) => { handler.Target.stationPlatformGO = platform; });
             return this;
         }
 
-        public TResult Build(AssetManagerLoader loader)
+        public TResult Build(AssetManagerLoader loader, TrackedRide input)
         {
-            return null;
+            throw new System.NotImplementedException();
         }
     }
+
 }

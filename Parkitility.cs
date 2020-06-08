@@ -119,7 +119,7 @@ namespace Parkitilities
 
 
         #region Train
-        public static FrontBackTrainBuilder<TTrain> CreateTrain<TTrain>(GameObject go)
+        public static FrontBackTrainBuilder<TTrain> CreateTrain<TTrain>()
             where TTrain : CoasterCarInstantiatorFrontMiddleBack
         {
             return new FrontBackTrainBuilder<TTrain>();
@@ -152,7 +152,7 @@ namespace Parkitilities
         /// <param name="name"></param>
         /// <typeparam name="TTrackRide"></typeparam>
         /// <returns></returns>
-        public static TrackRideBuilder<TTrackRide> CreateTrackedRide<TTrackRide>(string name)
+        public static TrackRideBuilder<TTrackRide> CreateTrackedRide<TTrackRide>()
             where TTrackRide : TrackedRide
         {
             return new TrackRideBuilder<TTrackRide>(new GameObject());

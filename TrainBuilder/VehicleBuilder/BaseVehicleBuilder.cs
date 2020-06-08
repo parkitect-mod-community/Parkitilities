@@ -22,7 +22,7 @@ namespace Parkitilities
 
         public TSelf Id(String id)
         {
-            AddOrReplaceByTag(BaseVehicleBuilderLiterals.CONFIGURATION_GROUP,
+            AddStep(
                 "GUID",
                 (payload) => { payload.Go.name = id; });
             return this as TSelf;
@@ -31,7 +31,7 @@ namespace Parkitilities
 
         public TSelf RotationalControllerStartClosed(String transform, Vector3 openAngle, int order = 0)
         {
-            AddStep(BaseVehicleBuilderLiterals.SETUP_GROUP, "VEHICLE_CONSTRAINT", (payload) =>
+            AddStep("VEHICLE_CONSTRAINT", (payload) =>
             {
                 RestraintRotationController controller = payload.Go.AddComponent<RestraintRotationController>();
                 controller.transformName = transform;
@@ -44,7 +44,7 @@ namespace Parkitilities
 
         public TSelf RotationalControllerStartOpen(String transform, Vector3 closeAngle, int order = 0)
         {
-            AddStep(BaseVehicleBuilderLiterals.SETUP_GROUP, "VEHICLE_CONSTRAINT", (payload) =>
+            AddStep( "VEHICLE_CONSTRAINT", (payload) =>
             {
                 RestraintRotationController controller = payload.Go.AddComponent<RestraintRotationController>();
                 controller.transformName = transform;
@@ -58,7 +58,7 @@ namespace Parkitilities
 
         public TSelf TranslationControllerStartClosed(String transform, Vector3 closeTranslation, int order = 0)
         {
-            AddStep(BaseVehicleBuilderLiterals.SETUP_GROUP, "VEHICLE_CONSTRAINT", (payload) =>
+            AddStep("VEHICLE_CONSTRAINT", (payload) =>
             {
                 RestraintTranslationController controller = payload.Go.AddComponent<RestraintTranslationController>();
                 controller.transformName = transform;
@@ -71,7 +71,7 @@ namespace Parkitilities
         public TSelf CustomRestraintController<TRestraint>(String transform, Action<TRestraint> configure = null,
             int order = 0) where TRestraint : RestraintController
         {
-            AddStep(BaseVehicleBuilderLiterals.SETUP_GROUP, "VEHICLE_CONSTRAINT", (payload) =>
+            AddStep("VEHICLE_CONSTRAINT", (payload) =>
             {
                 TRestraint controller = payload.Go.AddComponent<TRestraint>();
                 controller.transformName = transform;
@@ -84,7 +84,7 @@ namespace Parkitilities
 
         public TSelf ClearAllRestraint()
         {
-            AddOrReplaceByTag(BaseVehicleBuilderLiterals.SETUP_GROUP, "VEHICLE_CONSTRAINT", (payload) =>
+            AddStep( "VEHICLE_CONSTRAINT", (payload) =>
             {
                 foreach (var controller in payload.Go.GetComponents<RestraintController>())
                 {
@@ -96,7 +96,7 @@ namespace Parkitilities
 
         public TSelf BackOffset(float offset)
         {
-            AddOrReplaceByTag(BaseVehicleBuilderLiterals.CONFIGURATION_GROUP, "BACK_OFFSET",
+            AddStep( "BACK_OFFSET",
                 (payload) => { payload.Target.offsetBack = offset; });
 
             return this as TSelf;
@@ -104,7 +104,7 @@ namespace Parkitilities
 
         public TSelf FrontOffset(float offset)
         {
-            AddOrReplaceByTag(BaseVehicleBuilderLiterals.CONFIGURATION_GROUP, "FRONT_OFFSET",
+            AddStep( "FRONT_OFFSET",
                 (payload) => { payload.Target.offsetFront = offset; });
 
             return this as TSelf;
@@ -132,7 +132,7 @@ namespace Parkitilities
 
         public TSelf CustomColor(Color[] colors)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.SetupGroup, "SETUP_CUSTOM_COLOR", (payload) =>
+            AddStep( "SETUP_CUSTOM_COLOR", (payload) =>
             {
                 if (payload.Go.GetComponent<CustomColors>() == null)
                 {
@@ -140,7 +140,7 @@ namespace Parkitilities
                 }
             });
 
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "CUSTOM_COLOR", (payload) =>
+            AddStep( "CUSTOM_COLOR", (payload) =>
             {
                 CustomColors customColors = payload.Go.GetComponent<CustomColors>();
                 customColors.setColors(colors);
@@ -151,7 +151,7 @@ namespace Parkitilities
 
         public TSelf DisableCustomColors()
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.SetupGroup, "SETUP_CUSTOM_COLOR",
+            AddStep( "SETUP_CUSTOM_COLOR",
                 (payload) =>
                 {
                     foreach (var comp in payload.Go.GetComponents<CustomColors>())
@@ -159,13 +159,13 @@ namespace Parkitilities
                         Object.Destroy(comp);
                     }
                 });
-            RemoveByTag("CUSTOM_COLOR");
+            RemoveAllStepsByTag("CUSTOM_COLOR");
             return this as TSelf;
 
         }
         public TSelf FindAndAttachComponent<TTarget>(String beginWith) where TTarget : Component
         {
-            AddStep(DecoBuilderLiterals.SetupGroup, (payload) =>
+            AddStep( (payload) =>
             {
                 List<Transform> transforms = new List<Transform>();
                 Utility.recursiveFindTransformsStartingWith(beginWith, payload.Go.transform, transforms);

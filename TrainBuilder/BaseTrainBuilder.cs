@@ -3,39 +3,51 @@ using System;
 namespace Parkitilities
 {
 
-    public class BaseTrainBuilder<TResult, TSelf> : BaseBuilder<TResult>
+    public class TrainContainer<T>
+    {
+        public TrainContainer(AssetManagerLoader loader, T target)
+        {
+            Loader = loader;
+            Target = target;
+        }
+
+        public AssetManagerLoader Loader { get;}
+        public T Target { get;}
+    }
+
+    public abstract class BaseTrainBuilder<TResult, TSelf> : BaseBuilder<TrainContainer<TResult>>
         where TSelf : class
         where TResult : CoasterCarInstantiator
     {
         public TSelf Id(String uid)
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "GUID", container => { container.name = uid; });
+            AddStep( "GUID", container => { container.Target.name = uid; });
             return this as TSelf;
         }
 
         public TSelf DisplayName(String display)
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "DISPLAY",
-                container => { container.displayName = display; });
+            AddStep( "DISPLAY",
+                container => { container.Target.displayName = display; });
             return this as TSelf;
         }
 
         public TSelf FrontVehicle<TVehicle>(TVehicle vehicle)
             where TVehicle : Vehicle
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "FRONT_VEHICLE",
-                (container) => { container.frontVehicleGO = vehicle; });
+            AddStep( "FRONT_VEHICLE",
+                (container) => { container.Target.frontVehicleGO = vehicle; });
             return this as TSelf;
         }
 
         public TSelf FrontVehicle<TVehicle>(IBuildable<TVehicle> vehicleBuilder, AssetManagerLoader loader)
             where TVehicle : Vehicle
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "FRONT_VEHICLE",
+            AddStep("FRONT_VEHICLE",
                 (container) =>
                 {
                     TVehicle vehicle = vehicleBuilder.Build(loader);
-                    container.frontVehicleGO = vehicle;
+                    container.Target.frontVehicleGO = vehicle;
                 });
             return this as TSelf;
         }
@@ -43,18 +55,18 @@ namespace Parkitilities
 
         public TSelf MaxTrainLength(int length)
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "MAX_TRAIN_LENGTH", (container) =>
+            AddStep("MAX_TRAIN_LENGTH", (container) =>
             {
-                container.maxTrainLength = length;
+                container.Target.maxTrainLength = length;
             });
             return this as TSelf;
         }
 
         public TSelf MinTrainLength(int length)
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "MIN_TRAIN_LENGTH", (container) =>
+            AddStep( "MIN_TRAIN_LENGTH", (container) =>
             {
-                container.maxTrainLength = length;
+                container.Target.maxTrainLength = length;
             });
             return this as TSelf;
         }
@@ -62,30 +74,30 @@ namespace Parkitilities
 
         public TSelf DefaultTrainLength(int length)
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "DEFAULT_TRAIN_LENGTH", (container) =>
+            AddStep("DEFAULT_TRAIN_LENGTH", (container) =>
             {
-                container.defaultTrainLength = length;
+                container.Target.defaultTrainLength = length;
             });
             return this as TSelf;
         }
 
         public TSelf RainProtection(float value)
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "RAIN_PROTECTION", (container) =>
+            AddStep("RAIN_PROTECTION", (container) =>
             {
-                container.rainProtection = value;
+                container.Target.rainProtection = value;
             });
             return this as TSelf;
         }
 
 
-        public TSelf MiddleVehicle<TVehicle>(TVehicle vehicle, AssetManagerLoader loader)
+        public TSelf MiddleVehicle<TVehicle>(TVehicle vehicle)
             where TVehicle : Vehicle
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "MIDDLE_VEHICLE",
+            AddStep( "MIDDLE_VEHICLE",
                 container =>
                 {
-                    container.vehicleGO = vehicle;
+                    container.Target.vehicleGO = vehicle;
                 });
             return this as TSelf;
         }
@@ -94,13 +106,14 @@ namespace Parkitilities
         public TSelf MiddleVehicle<TVehicle>(IBuildable<TVehicle> vehicleBuilder, AssetManagerLoader loader)
             where TVehicle : Vehicle
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "MIDDLE_VEHICLE",
+            AddStep( "MIDDLE_VEHICLE",
                 (container) =>
                 {
                     TVehicle vehicle = vehicleBuilder.Build(loader);
-                    container.vehicleGO = vehicle;
+                    container.Target.vehicleGO = vehicle;
                 });
             return this as TSelf;
         }
+
     }
 }

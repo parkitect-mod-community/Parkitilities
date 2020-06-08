@@ -15,10 +15,8 @@ namespace Parkitilities
     {
         protected struct Operation
         {
-            public String Group;
             public String Tag;
-            public int Priority;
-            public Action<TPayload> Handler;
+            public Action<TPayload> Handler { get; set; }
         }
 
         public static String FindAttachComponentTag(String beginWith)
@@ -26,17 +24,17 @@ namespace Parkitilities
             return BaseBuilderLiterals.FIND_ATTACH_COMPONENT + "_" + beginWith;
         }
 
-        private readonly List<Operation> _toApply = new List<Operation>();
+        private readonly List<Operation> _actions = new List<Operation>();
         private int _idx = 0;
 
         private readonly HashSet<String> _tags = new HashSet<string>();
 
-        public void RemoveByTag(String tag)
+        public void RemoveAllStepsByTag(String tag)
         {
             if (_tags.Contains(tag))
             {
                 _tags.Remove(tag);
-                _toApply.RemoveAll((cond) => cond.Tag.Equals(tag));
+                _actions.RemoveAll((cond) => cond.Tag.Equals(tag));
             }
         }
 
@@ -45,51 +43,32 @@ namespace Parkitilities
             return _tags.Contains(tag);
         }
 
-        protected void AddOrReplaceByTag(String group, String tag, Action<TPayload> handler)
-        {
-            if (ContainsTag(tag))
-            {
-                RemoveByTag(tag);
-            }
-            AddStep(group, handler);
-        }
 
-        protected void AddStep(String group, Action<TPayload> handler)
-        {
-            _toApply.Add(new Operation()
-            {
-                Group = group,
-                Priority = ++_idx,
-                Handler = handler
-            });
-        }
-
-        protected void AddStep(String group, String tag, Action<TPayload> handler)
+        public void AddStep(String tag, Action<TPayload> handler)
         {
             _tags.Add(tag);
-            _toApply.Add(new Operation()
+            _actions.Add(new Operation()
             {
-                Group = group,
                 Tag = tag,
-                Priority = ++_idx,
                 Handler = handler
             });
         }
 
-        protected IOrderedEnumerable<Operation> IterGroup(String group)
+        public void AddStep(Action<TPayload> handler)
         {
-            return _toApply.FindAll((t) => t.Group.Equals(group)).OrderBy(t => t.Priority);
+            _actions.Add(new Operation()
+            {
+                Handler = handler
+            });
         }
 
-        protected bool ApplyGroup(String group, TPayload target)
-        {
-            Debug.Log("=== " + group + " ===");
-            foreach (var op in IterGroup(group))
-            {
-                op.Handler(target);
-            }
 
-            return true;
+        protected void Apply(TPayload target)
+        {
+            foreach (var action in _actions)
+            {
+                action.Handler(target);
+            }
         }
     }
 }

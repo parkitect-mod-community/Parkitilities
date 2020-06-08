@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace Parkitilities
 {
-    public static class TrainBuilderLiterals
-    {
-        public const String SETUP_GROUP = "SETUP";
-    }
 
     public class FrontBackTrainBuilder<TResult> : BaseTrainBuilder<TResult,FrontBackTrainBuilder<TResult>>, IBuildable<TResult> where TResult : CoasterCarInstantiatorFrontMiddleBack
     {
@@ -16,40 +12,45 @@ namespace Parkitilities
         {
         }
 
-        public FrontBackTrainBuilder<TResult> BackVehicle<TVehicle>(IBuildable<TVehicle> vehicleBuilder, AssetManagerLoader loader)
+        public FrontBackTrainBuilder<TResult> BackVehicle<TVehicle>(IBuildable<TVehicle> vehicleBuilder)
             where TVehicle : Vehicle
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "BACK_VEHICLE", (container) =>
+            AddStep("BACK_VEHICLE", (container) =>
             {
-                TVehicle vehicle = vehicleBuilder.Build(loader);
-                container.rearVehicleGO = vehicle;
+                TVehicle vehicle = vehicleBuilder.Build(container.Loader);
+                container.Target.rearVehicleGO = vehicle;
             });
             return this;
         }
 
-        public FrontBackTrainBuilder<TResult> BackVehicle<TVehicle>(TVehicle vehicle, AssetManagerLoader loader)
+        public FrontBackTrainBuilder<TResult> BackVehicle<TVehicle>(TVehicle vehicle)
             where TVehicle : Vehicle
         {
-            AddOrReplaceByTag(TrainBuilderLiterals.SETUP_GROUP, "BACK_VEHICLE", (container) =>
+            AddStep( "BACK_VEHICLE", (container) =>
             {
-                container.rearVehicleGO = vehicle;
+                container.Target.rearVehicleGO = vehicle;
             });
             return this;
         }
 
-        public TResult Register(AssetManagerLoader loader, String refrenceName)
+        /// <summary>
+        /// Register to an existing coaster that has been loaded
+        /// </summary>
+        /// <param name="loader"></param>
+        /// <param name="attractionName"></param>
+        /// <returns></returns>
+        public TResult Register(AssetManagerLoader loader, String attractionName)
         {
             TResult result = Build(loader);
             foreach (Attraction attractionObject in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
             {
-                if (attractionObject is TrackedRide && attractionObject.getUnlocalizedName() == refrenceName)
+                if (attractionObject is TrackedRide && attractionObject.getUnlocalizedName() == attractionName)
                 {
                     ScriptableSingleton<AssetManager>.Instance.registerCoasterCarInstantiator(
-                        attractionObject.getReferenceName(), (CoasterCarInstantiator) result);
+                        attractionObject.getReferenceName(), result);
                     break;
                 }
             }
-
             return result;
         }
 
@@ -63,9 +64,9 @@ namespace Parkitilities
                 throw new Exception("Middle Train is unset");
 
 
-            TResult instantiate = ScriptableObject.CreateInstance<TResult>();
-            ApplyGroup(TrainBuilderLiterals.SETUP_GROUP, instantiate);
-            return instantiate;
+            TResult result = ScriptableObject.CreateInstance<TResult>();
+            Apply(new TrainContainer<TResult>(loader, result));
+            return result;
         }
 
     }

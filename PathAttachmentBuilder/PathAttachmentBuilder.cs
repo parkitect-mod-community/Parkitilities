@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Parkitilities.PathAttachmentBuilder
 {
-    public class PathAttachmentBuilder<TResult>: BasePathAttachment<BaseObjectContainer<TResult>, TResult, PathAttachmentBuilder<TResult>>, IBuildable<TResult>
+    public class PathAttachmentBuilder<TResult>: BasePathAttachment<BaseObjectContainer<TResult>, TResult, PathAttachmentBuilder<TResult>>
         where TResult : PathAttachment
     {
         private readonly GameObject _go = null;
@@ -12,7 +12,7 @@ namespace Parkitilities.PathAttachmentBuilder
             _go = go;
         }
 
-        public TResult Build(AssetManagerLoader loader)
+        public override TResult Build(AssetManagerLoader loader)
         {
             GameObject go = UnityEngine.Object.Instantiate(_go);
             if (!go.TryGetComponent<TResult>(out var pathAttachment))
@@ -22,13 +22,8 @@ namespace Parkitilities.PathAttachmentBuilder
                     throw new Exception("Guid is never set");
             }
 
-            BaseObjectContainer<TResult> dc = new BaseObjectContainer<TResult>()
-            {
-                Target = pathAttachment,
-                Go = go
-            };
-            ApplyGroup(BasePathAttachmentLiteral.SetupGroup, dc);
-            ApplyGroup(BasePathAttachmentLiteral.ConfigurationGroup, dc);
+
+            Apply(new BaseObjectContainer<TResult>(loader,pathAttachment,go));
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);

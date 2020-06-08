@@ -7,10 +7,33 @@ using Object = UnityEngine.Object;
 namespace Parkitilities
 {
 
-    public static class DecoBuilderLiterals
+    public class LightControllerBuilder<TFrom, TResult> where TFrom: DecoBuilder<TResult> where TResult : Deco
     {
-        public const String SetupGroup = "SETUP";
-        public const String ConfigurationGroup = "CONFIGURATION";
+        private readonly TFrom _from;
+
+        public LightControllerBuilder(TFrom from)
+        {
+            _from = from;
+        }
+
+        public LightControllerBuilder<TFrom, TResult> Slot(int slot)
+        {
+            _from.AddStep("NIGHT_SLOT", (payload) =>
+            {
+                LightController controller = payload.Go.GetComponent<LightController>();
+                if (controller != null)
+                {
+                    controller.useCustomColors = true;
+                    controller.customColorSlot = slot;
+                }
+            });
+            return this;
+        }
+
+        public DecoBuilder<TResult> End()
+        {
+            return _from;
+        }
     }
 
     public class DecoBuilder<TResult> : BaseBuilder<BaseObjectContainer<TResult>>, IBuildable<TResult>,
@@ -29,7 +52,7 @@ namespace Parkitilities
 
         public DecoBuilder<TResult> Resizable(float min, float max)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "RESIZABLE", (payload) =>
+            AddStep("RESIZABLE", (payload) =>
             {
                 if (!payload.Go.TryGetComponent<CustomSize>(out var component))
                 {
@@ -42,9 +65,10 @@ namespace Parkitilities
             return this;
         }
 
-        public DecoBuilder<TResult> ClearResizable()
+        public DecoBuilder<TResult> DisableResizable()
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "RESIZABLE", (payload) =>
+            RemoveAllStepsByTag("RESIZABLE");
+            AddStep("RESIZABLE", (payload) =>
             {
                 foreach (var component in payload.Go.GetComponents<CustomSize>())
                 {
@@ -56,23 +80,22 @@ namespace Parkitilities
 
         public DecoBuilder<TResult> Id(String id)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "GUID", (payload) => { payload.Go.name = id; });
+            AddStep("GUID", (payload) => { payload.Go.name = id; });
             return this;
         }
 
 
         public DecoBuilder<TResult> SeeThrough(bool state)
         {
-                AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "SEE_THROUGH",
-                    (payload) => { payload.Target.canSeeThrough = state; });
-
+            AddStep("SEE_THROUGH",
+                payload => { payload.Target.canSeeThrough = state; });
             return this;
         }
 
 
         public DecoBuilder<TResult> BlockRain(bool state)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "BLOCK_RAIN",
+            AddStep("BLOCK_RAIN",
                 (payload) => { payload.Target.canBlockRain = state; });
 
             return this;
@@ -80,16 +103,13 @@ namespace Parkitilities
 
         public DecoBuilder<TResult> HeightChangeDelta(float delta)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "HEIGHT_CHANGE_DELTA", (payload) =>
-            {
-                payload.Target.heightChangeDelta = delta;
-            });
+            AddStep("HEIGHT_CHANGE_DELTA", (payload) => { payload.Target.heightChangeDelta = delta; });
             return this;
         }
 
         public DecoBuilder<TResult> Category(String group, String subGroup = "")
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "CATEGORY", (payload) =>
+            AddStep("CATEGORY", (payload) =>
             {
                 if (String.IsNullOrEmpty(subGroup))
                 {
@@ -105,26 +125,29 @@ namespace Parkitilities
 
         public DecoBuilder<TResult> DisplayName(String name)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "DISPLAY",
+            AddStep("DISPLAY",
                 (payload) => { payload.Target.setDisplayName(name); });
             return this;
         }
 
-        public DecoBuilder<TResult> EnableLightsOnAtNight()
+
+        public LightControllerBuilder<DecoBuilder<TResult>,TResult> LightsOnAtNight()
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.SetupGroup, "LIGHTS_ON_NIGHT", (payload) =>
+            AddStep("LIGHTS_ON_NIGHT", (payload) =>
             {
-                if (payload.Go.GetComponent<LightController>() == null)
+                foreach (var controller in payload.Go.GetComponents<LightController>())
                 {
-                    payload.Go.AddComponent<LightController>();
+                    Object.Destroy(controller);
                 }
             });
-            return this;
+            return new LightControllerBuilder<DecoBuilder<TResult>,TResult>(this);
         }
 
         public DecoBuilder<TResult> DisableLightsOnAtNight()
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.SetupGroup, "LIGHTS_ON_NIGHT", (payload) =>
+            RemoveAllStepsByTag("LIGHTS_ON_NIGHT");
+            RemoveAllStepsByTag("NIGHT_SLOT");
+            AddStep("LIGHTS_ON_NIGHT", (payload) =>
             {
                 foreach (var controller in payload.Go.GetComponents<LightController>())
                 {
@@ -132,28 +155,11 @@ namespace Parkitilities
                 }
             });
             return this;
-
         }
-
-        public DecoBuilder<TResult> NightColorSlot(int slot)
-        {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "NIGHT_SLOT", (payload) =>
-            {
-                LightController controller = payload.Go.GetComponent<LightController>();
-                if (controller != null)
-                {
-                    controller.useCustomColors = true;
-                    controller.customColorSlot = slot;
-                }
-            });
-            return this;
-        }
-
 
         public DecoBuilder<TResult> Price(float price)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "PRICE",
-                (payload) => { payload.Target.price = price; });
+            AddStep("PRICE", payload => { payload.Target.price = price; });
             return this;
         }
 
@@ -180,18 +186,14 @@ namespace Parkitilities
 
         public DecoBuilder<TResult> CustomColor(Color[] colors)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.SetupGroup, "SETUP_CUSTOM_COLOR", (payload) =>
+            AddStep("CUSTOM_COLOR", (payload) =>
             {
-                if (payload.Go.GetComponent<CustomColors>() == null)
+                if (!payload.Go.TryGetComponent<CustomColors>(out var component))
                 {
-                    payload.Go.AddComponent<CustomColors>();
+                    component = payload.Go.AddComponent<CustomColors>();
                 }
-            });
 
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "CUSTOM_COLOR", (payload) =>
-            {
-                CustomColors customColors = payload.Go.GetComponent<CustomColors>();
-                customColors.setColors(colors);
+                component.setColors(colors);
             });
             return this;
         }
@@ -199,7 +201,8 @@ namespace Parkitilities
 
         public DecoBuilder<TResult> DisableCustomColors()
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.SetupGroup, "SETUP_CUSTOM_COLOR",
+            RemoveAllStepsByTag("CUSTOM_COLOR");
+            AddStep("CUSTOM_COLOR",
                 (payload) =>
                 {
                     foreach (var comp in payload.Go.GetComponents<CustomColors>())
@@ -207,21 +210,20 @@ namespace Parkitilities
                         Object.Destroy(comp);
                     }
                 });
-            RemoveByTag("CUSTOM_COLOR");
             return this;
         }
 
 
         public DecoBuilder<TResult> SnapGridToCenter(bool state)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "SNAP_GRID_CENTER",
+            AddStep("SNAP_GRID_CENTER",
                 (payload) => { payload.Target.defaultSnapToGridCenter = state; });
             return this;
         }
 
         public DecoBuilder<TResult> GridSubdivisions(float divisions)
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.ConfigurationGroup, "GRID_SUBDIVISION",
+            AddStep("GRID_SUBDIVISION",
                 (payload) => { payload.Target.defaultGridSubdivision = divisions; });
             return this;
         }
@@ -229,7 +231,7 @@ namespace Parkitilities
         public DecoBuilder<TResult> AddBoundingBox(Bounds bound,
             BoundingVolume.Layers layers = BoundingVolume.Layers.Buildvolume)
         {
-            AddStep(DecoBuilderLiterals.ConfigurationGroup, "BOUNDING_BOX", (payload) =>
+            AddStep("BOUNDING_BOX", (payload) =>
             {
                 BoundingBox b = payload.Go.AddComponent<BoundingBox>();
                 b.setBounds(bound);
@@ -240,7 +242,8 @@ namespace Parkitilities
 
         public DecoBuilder<TResult> ClearBoundingBoxes()
         {
-            AddOrReplaceByTag(DecoBuilderLiterals.SetupGroup, "BOUNDING_BOX", (payload) =>
+            RemoveAllStepsByTag("BOUNDING_BOX");
+            AddStep("BOUNDING_BOX", (payload) =>
             {
                 foreach (var comp in payload.Go.GetComponents<BoundingBox>())
                 {
@@ -252,7 +255,7 @@ namespace Parkitilities
 
         public DecoBuilder<TResult> FindAndAttachComponent<TTarget>(String beginWith) where TTarget : Component
         {
-            AddStep(DecoBuilderLiterals.SetupGroup, (payload) =>
+            AddStep((payload) =>
             {
                 List<Transform> transforms = new List<Transform>();
                 Utility.recursiveFindTransformsStartingWith(beginWith, payload.Go.transform, transforms);
@@ -276,14 +279,7 @@ namespace Parkitilities
                     throw new Exception("Guid is never set");
             }
 
-            BaseObjectContainer<TResult> dc = new BaseObjectContainer<TResult>()
-            {
-                Target = deco,
-                Go = go
-            };
-
-            ApplyGroup(DecoBuilderLiterals.SetupGroup, dc);
-            ApplyGroup(DecoBuilderLiterals.ConfigurationGroup, dc);
+            Apply(new BaseObjectContainer<TResult>(loader, deco, go));
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
