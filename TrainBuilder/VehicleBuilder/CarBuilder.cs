@@ -4,15 +4,11 @@ using UnityEngine;
 namespace Parkitilities
 {
 
-    public class CarContainer<T> : BaseVehicleContainer<T>
-    {
 
-    }
-
-    public class CarBuilder<TResult> : BaseVehicleBuilder<CarContainer<TResult>, TResult, CarBuilder<TResult>>
+    public class CarBuilder<TResult> : BaseVehicleBuilder<BaseObjectContainer<TResult>, TResult, CarBuilder<TResult>>
         where TResult : Car
     {
-        private GameObject _go;
+        private readonly GameObject _go;
 
         public CarBuilder(GameObject go)
         {
@@ -22,22 +18,22 @@ namespace Parkitilities
         public TResult Build(AssetManagerLoader loader)
         {
             GameObject go = UnityEngine.Object.Instantiate(_go);
-            if (!go.TryGetComponent<TResult>(out var vehicle)
-            ) // existing Decos are not evaluated. Assumed to be configured correctly
+            // existing Decos are not evaluated. Assumed to be configured correctly
+            if (!go.TryGetComponent<TResult>(out var vehicle))
             {
                 vehicle = go.AddComponent<TResult>();
                 if (!ContainsTag("GUID"))
                     throw new Exception("Guid is never set");
             }
 
-            CarContainer<TResult> dc = new CarContainer<TResult>()
+            BaseObjectContainer<TResult> dc = new BaseObjectContainer<TResult>()
             {
                 Go = go,
-                Vehicle = vehicle
+                Target = vehicle
             };
 
-            ApplyGroup(DecoBuilderLiterals.SETUP_GROUP, dc);
-            ApplyGroup(DecoBuilderLiterals.CONFIGURATION_GROUP, dc);
+            ApplyGroup(DecoBuilderLiterals.SetupGroup, dc);
+            ApplyGroup(DecoBuilderLiterals.ConfigurationGroup, dc);
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);

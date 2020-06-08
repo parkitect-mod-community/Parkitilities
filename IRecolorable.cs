@@ -2,12 +2,13 @@ using UnityEngine;
 
 namespace Parkitilities
 {
-    public interface IRecolorable<Y>
+    public interface IRecolorable<TResult>
     {
-        Y CustomColor(Color c1);
-        Y CustomColor(Color c1, Color c2);
-        Y CustomColor(Color c1, Color c2, Color c3);
-        Y CustomColor(Color c1, Color c2, Color c3, Color c4);
-        Y CustomColor(Color[] colors);
+        TResult CustomColor(Color c1);
+        TResult CustomColor(Color c1, Color c2);
+        TResult CustomColor(Color c1, Color c2, Color c3);
+        TResult CustomColor(Color c1, Color c2, Color c3, Color c4);
+        TResult CustomColor(Color[] colors);
+        TResult DisableCustomColors();
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Parkitect.Mods.AssetPacks;
 using UnityEngine;
@@ -7,6 +8,11 @@ namespace Parkitilities
 {
     public static class Parkitility
     {
+
+        public enum TrackRide
+        {
+
+        }
 
         private static Material standard;
         private static Material diffuse;
@@ -52,48 +58,114 @@ namespace Parkitilities
             }
         }
 
-        public static DecoBuilder<TDeco> CreateDefault<TDeco>(GameObject go) where TDeco : Deco
-        {
-            return new DecoBuilder<TDeco>(go)
-                .FindAndAttachComponent<OnlyActiveInBuildMode>("BuildMode", DecoBuilderLiterals.FIND_ATTACH_COMPONENT_BUILDMODE);
-        }
+        #region Deco
 
-        public static DecoBuilder<TDeco> CreateDefault<TDeco>(GameObject go, Asset asset)  where TDeco : Deco
+        public static DecoBuilder<TDeco> CreateDeco<TDeco>(GameObject go, Asset asset) where TDeco : Deco
         {
-            Color[] colors = new Color[asset.CustomColors.Count];
-            for (int x = 0; x < asset.CustomColors.Count; x++)
-            {
-                colors[x] = new Color(asset.CustomColors[x].Red,asset.CustomColors[x].Green,asset.CustomColors[x].Blue,asset.CustomColors[x].Alpha);
-            }
-
-            return CreateDefault<TDeco>(go)
+            DecoBuilder<TDeco> builder = CreateDeco<TDeco>(go)
                 .Id(asset.Guid)
                 .DisplayName(asset.Name)
                 .Price(asset.Price)
-                .CustomColor(colors);
+                .Category(asset.Category, asset.SubCategory)
+                .SeeThrough(asset.SeeThrough)
+                .BlockRain(asset.BlocksRain)
+                .SnapGridToCenter(asset.SnapCenter)
+                .GridSubdivisions(asset.GridSubdivision);
+
+            if (asset.IsResizable) builder.Resizable(asset.MinSize, asset.MaxSize);
+            if (asset.HasCustomColors) builder.CustomColor(AssetPackUtilities.ConvertColors(asset.CustomColors));
+            foreach (var bound in AssetPackUtilities.ConvertBoundingBox(asset.BoundingBoxes.ToArray()))
+                builder.AddBoundingBox(bound);
+
+            return builder;
         }
 
-        public static VehicleBuilder<TVehicle> FromVehicle<TVehicle>() where TVehicle : Vehicle
+        public static DecoBuilder<TDeco> CreateDeco<TDeco>(GameObject go) where TDeco : Deco
         {
-            return new VehicleBuilder<TVehicle>();
+            return new DecoBuilder<TDeco>(go);
         }
 
-        public static CarBuilder<TCar> FromCar<TCar>() where TCar : Car
+        public static DecoBuilder<Deco> CreateDeco(GameObject go)
         {
-            return new CarBuilder<TCar>();
+            return CreateDeco<Deco>(go);
         }
 
+        #endregion
 
-        public static CustomColors ApplyRecolorable(Color[] colors, GameObject go)
+        #region Vehicle
+
+        public static CarBuilder<Car> CreateCar(GameObject go)
         {
-            if (colors.Length > 0)
+            return CreateCar<Car>(go);
+        }
+
+        public static CarBuilder<TCar> CreateCar<TCar>(GameObject go, CoasterCar car) where TCar : Car
+        {
+            return CreateCar<TCar>(go)
+                .Id(car.Guid);
+        }
+
+        public static VehicleBuilder<TVehicle> CreateVehicle<TVehicle>(GameObject go) where TVehicle : Vehicle
+        {
+            return new VehicleBuilder<TVehicle>(go);
+        }
+
+        public static CarBuilder<TCar> CreateCar<TCar>(GameObject go) where TCar : Car
+        {
+            return new CarBuilder<TCar>(go);
+        }
+
+        #endregion
+
+
+        #region Train
+        public static FrontBackTrainBuilder<TTrain> CreateTrain<TTrain>(GameObject go)
+            where TTrain : CoasterCarInstantiatorFrontMiddleBack
+        {
+            return new FrontBackTrainBuilder<TTrain>();
+        }
+
+        #endregion
+
+        #region TrackRide
+
+        public static TrackRideBuilder<TTrackRide> FromTrackedRide<TTrackRide>(string name) where TTrackRide : TrackedRide
+        {
+
+            TrackedRide original = null;
+            foreach (Attraction current in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
             {
-                CustomColors customColors = go.AddComponent<CustomColors>();
-                customColors.setColors(colors, true);
-                return customColors;
+                if (current.getUnlocalizedName() == name)
+                {
+                    original = (TrackedRide)current;
+                    break;
+                }
             }
+            if(original == null)
+                throw new Exception("Can't Find Track Ride: " + name);
+            return new TrackRideBuilder<TTrackRide>(original.gameObject);
+        }
 
-            return null;
+        /// <summary>
+        /// create tracked ride with empty object.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <typeparam name="TTrackRide"></typeparam>
+        /// <returns></returns>
+        public static TrackRideBuilder<TTrackRide> CreateTrackedRide<TTrackRide>(string name)
+            where TTrackRide : TrackedRide
+        {
+            return new TrackRideBuilder<TTrackRide>(new GameObject());
+        }
+
+        #endregion
+
+
+        #region Utilities
+
+        public static String CurrentModDirectory()
+        {
+            return System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
         public static void ReplaceWithParkitectMaterial(Renderer renderer)
@@ -124,5 +196,9 @@ namespace Parkitilities
 
             renderer.sharedMaterials = materials;
         }
+
+        #endregion
+
+
     }
 }

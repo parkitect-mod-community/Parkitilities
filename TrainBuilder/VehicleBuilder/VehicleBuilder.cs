@@ -3,12 +3,8 @@ using UnityEngine;
 
 namespace Parkitilities
 {
-    public class VehicleContainer<T> : BaseVehicleContainer<T>
-    {
 
-    }
-
-    public class VehicleBuilder<TResult>: BaseVehicleBuilder<VehicleContainer<TResult>,TResult,VehicleBuilder<TResult>>, IBuildable<TResult> where TResult: Vehicle
+    public class VehicleBuilder<TResult>: BaseVehicleBuilder<BaseObjectContainer<TResult>,TResult,VehicleBuilder<TResult>>, IBuildable<TResult> where TResult: Vehicle
     {
         private GameObject _go;
 
@@ -27,14 +23,14 @@ namespace Parkitilities
                     throw new Exception("Guid is never set");
             }
 
-            VehicleContainer<TResult> dc = new VehicleContainer<TResult>()
+            BaseObjectContainer<TResult> dc = new BaseObjectContainer<TResult>()
             {
                 Go = go,
-                Vehicle = vehicle
+                Target = vehicle
             };
 
-            ApplyGroup(DecoBuilderLiterals.SETUP_GROUP, dc);
-            ApplyGroup(DecoBuilderLiterals.CONFIGURATION_GROUP, dc);
+            ApplyGroup(DecoBuilderLiterals.SetupGroup, dc);
+            ApplyGroup(DecoBuilderLiterals.ConfigurationGroup, dc);
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
