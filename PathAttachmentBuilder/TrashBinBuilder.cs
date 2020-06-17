@@ -24,14 +24,15 @@ namespace Parkitilities.PathAttachmentBuilder
         public override TResult Build(AssetManagerLoader loader)
         {
             GameObject go = UnityEngine.Object.Instantiate(_go);
-            if (!go.TryGetComponent<TResult>(out var trashBin))
+            TResult trashBin = go.GetComponent<TResult>();
+            if (trashBin == null)
             {
                 trashBin = go.AddComponent<TResult>();
                 if (!ContainsTag("GUID"))
                     throw new Exception("Guid is never set");
             }
 
-            Apply(new BaseObjectContainer<TResult>(loader,trashBin,go));
+            Apply(new BaseObjectContainer<TResult>(loader, trashBin, go));
 
             // ApplyGroup(BasePathAttachmentLiteral.SetupGroup, dc);
             // ApplyGroup(BasePathAttachmentLiteral.ConfigurationGroup, dc);

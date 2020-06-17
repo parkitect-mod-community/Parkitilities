@@ -19,7 +19,8 @@ namespace Parkitilities
         {
             GameObject go = UnityEngine.Object.Instantiate(_go);
             // existing Decos are not evaluated. Assumed to be configured correctly
-            if (!go.TryGetComponent<TResult>(out var vehicle))
+            TResult vehicle = go.GetComponent<TResult>();
+            if (vehicle == null)
             {
                 vehicle = go.AddComponent<TResult>();
                 if (!ContainsTag("GUID"))

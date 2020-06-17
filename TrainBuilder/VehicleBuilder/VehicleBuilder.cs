@@ -4,11 +4,14 @@ using UnityEngine;
 namespace Parkitilities
 {
 
-    public class VehicleBuilder<TResult>: BaseVehicleBuilder<BaseObjectContainer<TResult>,TResult,VehicleBuilder<TResult>>, IBuildable<TResult> where TResult: Vehicle
+    public class
+        VehicleBuilder<TResult> : BaseVehicleBuilder<BaseObjectContainer<TResult>, TResult, VehicleBuilder<TResult>>,
+            IBuildable<TResult> where TResult : Vehicle
     {
         private GameObject _go;
 
-        public VehicleBuilder(GameObject go) {
+        public VehicleBuilder(GameObject go)
+        {
             _go = go;
         }
 
@@ -16,7 +19,8 @@ namespace Parkitilities
         public TResult Build(AssetManagerLoader loader)
         {
             GameObject go = UnityEngine.Object.Instantiate(_go);
-            if (!go.TryGetComponent<TResult>(out var vehicle)) // existing Decos are not evaluated. Assumed to be configured correctly
+            TResult vehicle = go.GetComponent<TResult>();
+            if (vehicle == null) // existing Decos are not evaluated. Assumed to be configured correctly
             {
                 vehicle = go.AddComponent<TResult>();
                 if (!ContainsTag("GUID"))
@@ -24,11 +28,12 @@ namespace Parkitilities
             }
 
 
-            Apply(new BaseObjectContainer<TResult>(loader,vehicle,go));
+            Apply(new BaseObjectContainer<TResult>(loader, vehicle, go));
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
             }
+
             return vehicle;
         }
     }

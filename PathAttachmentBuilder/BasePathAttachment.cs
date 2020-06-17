@@ -36,12 +36,12 @@ namespace Parkitilities.PathAttachmentBuilder
         {
             AddStep("CUSTOM_COLOR", (payload) =>
             {
-                if (!payload.Go.TryGetComponent<CustomColors>(out var component))
+                CustomColors customColors =  payload.Go.GetComponent<CustomColors>();
+                if (customColors == null)
                 {
-                    component = payload.Go.AddComponent<CustomColors>();
+                    customColors = payload.Go.AddComponent<CustomColors>();
                 }
-
-                component.setColors(colors);
+                customColors.setColors(colors);
             });
             return this as TSelf;
         }

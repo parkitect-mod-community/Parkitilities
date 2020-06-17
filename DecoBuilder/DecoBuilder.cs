@@ -54,13 +54,14 @@ namespace Parkitilities
         {
             AddStep("RESIZABLE", (payload) =>
             {
-                if (!payload.Go.TryGetComponent<CustomSize>(out var component))
-                {
-                    component = payload.Go.AddComponent<CustomSize>();
-                }
 
-                component.minSize = min;
-                component.maxSize = max;
+                CustomSize customSize = payload.Go.GetComponent<CustomSize>();
+                if (customSize == null)
+                {
+                    customSize = payload.Go.AddComponent<CustomSize>();
+                }
+                customSize.minSize = min;
+                customSize.maxSize = max;
             });
             return this;
         }
@@ -188,12 +189,12 @@ namespace Parkitilities
         {
             AddStep("CUSTOM_COLOR", (payload) =>
             {
-                if (!payload.Go.TryGetComponent<CustomColors>(out var component))
+                CustomColors customColors = payload.Go.GetComponent<CustomColors>();
+                if (customColors == null)
                 {
-                    component = payload.Go.AddComponent<CustomColors>();
+                    customColors = payload.Go.AddComponent<CustomColors>();
                 }
-
-                component.setColors(colors);
+                customColors.setColors(colors);
             });
             return this;
         }
@@ -272,7 +273,8 @@ namespace Parkitilities
         {
             GameObject go = UnityEngine.Object.Instantiate(_go);
             // existing Decos are not evaluated. Assumed to be configured correctly
-            if (!go.TryGetComponent<TResult>(out var deco))
+            TResult deco = go.GetComponent<TResult>();
+            if (deco == null)
             {
                 deco = go.AddComponent<TResult>();
                 if (!ContainsTag("GUID"))
@@ -284,6 +286,8 @@ namespace Parkitilities
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
             }
+            // register deco
+            loader.RegisterObject(deco);
 
 
             return deco;

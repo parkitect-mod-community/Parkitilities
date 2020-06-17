@@ -18,14 +18,18 @@ namespace Parkitilities
 
         public void RegisterObject(SerializedMonoBehaviour behaviour)
         {
+            behaviour.dontSerialize = true;
+            behaviour.isPreview = true;
+            HideGo(behaviour.gameObject);
             ScriptableSingleton<AssetManager>.Instance.registerObject(behaviour);
             _behaviours.Add(behaviour);
+            Object.DontDestroyOnLoad(behaviour.gameObject);
         }
 
-        public void RegisterObject(ReferenceableScriptableObject scriptableObject)
+        public void RegisterObject(ReferenceableScriptableObject scriptable)
         {
-            ScriptableSingleton<AssetManager>.Instance.registerObject(scriptableObject);
-            _scriptable.Add(scriptableObject);
+            ScriptableSingleton<AssetManager>.Instance.registerObject(scriptable);
+            _scriptable.Add(scriptable);
         }
 
         public void Unload()
@@ -34,6 +38,12 @@ namespace Parkitilities
             {
                 ScriptableSingleton<AssetManager>.Instance.unregisterObject(behaviour);
             }
+
+            foreach (var scriptable in _scriptable)
+            {
+                ScriptableSingleton<AssetManager>.Instance.unregisterObject(scriptable);
+            }
+
             Object.Destroy(_hider);
         }
     }
