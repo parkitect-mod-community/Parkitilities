@@ -33,6 +33,7 @@ namespace Parkitilities
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
             }
+            loader.RegisterObject(vehicle);
 
             return vehicle;
         }

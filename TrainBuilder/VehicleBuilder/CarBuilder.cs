@@ -3,9 +3,8 @@ using UnityEngine;
 
 namespace Parkitilities
 {
-
-
-    public class CarBuilder<TResult> : BaseVehicleBuilder<BaseObjectContainer<TResult>, TResult, CarBuilder<TResult>>, IBuildable<TResult>
+    public class CarBuilder<TResult> : BaseVehicleBuilder<BaseObjectContainer<TResult>, TResult, CarBuilder<TResult>>,
+        IBuildable<TResult>
         where TResult : Car
     {
         private readonly GameObject _go;
@@ -27,13 +26,14 @@ namespace Parkitilities
                     throw new Exception("Guid is never set");
             }
 
-            Apply(new BaseObjectContainer<TResult>(loader,vehicle,go));
+            Apply(new BaseObjectContainer<TResult>(loader, vehicle, go));
             // ApplyGroup(DecoBuilderLiterals.SetupGroup, dc);
             // ApplyGroup(DecoBuilderLiterals.ConfigurationGroup, dc);
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
             }
+            loader.RegisterObject(vehicle);
 
             return vehicle;
         }
