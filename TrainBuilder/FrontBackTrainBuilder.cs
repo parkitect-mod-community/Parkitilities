@@ -46,6 +46,7 @@ namespace Parkitilities
             {
                 if (attractionObject is TrackedRide && attractionObject.getUnlocalizedName() == attractionName)
                 {
+                    Debug.Log("Register Attaction " + attractionName);
                     ScriptableSingleton<AssetManager>.Instance.registerCoasterCarInstantiator(
                         attractionObject.getReferenceName(), result);
                     break;
@@ -66,6 +67,7 @@ namespace Parkitilities
 
             TResult result = ScriptableObject.CreateInstance<TResult>();
             Apply(new TrainContainer<TResult>(loader, result));
+            loader.RegisterObject(result);
             return result;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Parkitilities
@@ -27,12 +28,12 @@ namespace Parkitilities
                     throw new Exception("Guid is never set");
             }
 
-
             Apply(new BaseObjectContainer<TResult>(loader, vehicle, go));
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
             }
+
             loader.RegisterObject(vehicle);
 
             return vehicle;

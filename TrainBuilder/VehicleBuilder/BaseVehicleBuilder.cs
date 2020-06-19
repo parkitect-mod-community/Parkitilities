@@ -5,14 +5,6 @@ using Object = UnityEngine.Object;
 
 namespace Parkitilities
 {
-
-    public static class BaseVehicleBuilderLiterals
-    {
-        public const String SETUP_GROUP = "SETUP";
-        public const String CONFIGURATION_GROUP = "CONFIGURATION";
-
-    }
-
     public abstract class BaseVehicleBuilder<TContainer, TResult, TSelf> : BaseBuilder<TContainer>,
         IComponentUtilities<TSelf>, IRecolorable<TSelf>
         where TSelf : class

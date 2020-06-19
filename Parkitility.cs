@@ -115,6 +115,15 @@ namespace Parkitilities
             return new CarBuilder<TCar>(go);
         }
 
+        public static CarBuilder<TCar> FromCar<TCar>(GameObject go, Asset asset) where TCar : Car
+        {
+            return new CarBuilder<TCar>(go)
+                .Id(asset.Guid)
+                .BackOffset(asset.Car.OffsetBack)
+                .FrontOffset(asset.Car.OffsetFront)
+                .CustomColor(AssetPackUtilities.ConvertColors(asset.CustomColors));
+        }
+
         #endregion
 
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Parkitilities
@@ -14,6 +15,7 @@ namespace Parkitilities
             _go = go;
         }
 
+
         public TResult Build(AssetManagerLoader loader)
         {
             GameObject go = UnityEngine.Object.Instantiate(_go);
@@ -27,12 +29,19 @@ namespace Parkitilities
             }
 
             Apply(new BaseObjectContainer<TResult>(loader, vehicle, go));
-            // ApplyGroup(DecoBuilderLiterals.SetupGroup, dc);
-            // ApplyGroup(DecoBuilderLiterals.ConfigurationGroup, dc);
             foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
             }
+
+            List<Transform> transforms = new List<Transform>();
+            Utility.recursiveFindTransformsStartingWith("WheelsFront", go.transform, transforms);
+            vehicle.frontAxisArray = transforms.ToArray();
+            transforms.Clear();
+            Utility.recursiveFindTransformsStartingWith("WheelsBack", go.transform, transforms);
+            vehicle.backAxisArray = transforms.ToArray();
+
+
             loader.RegisterObject(vehicle);
 
             return vehicle;

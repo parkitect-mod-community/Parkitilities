@@ -18,6 +18,9 @@ namespace Parkitilities
 
         public void RegisterObject(SerializedMonoBehaviour behaviour)
         {
+
+            Debug.Log("Register GameObject Object " + behaviour.name);
+
             behaviour.dontSerialize = true;
             behaviour.isPreview = true;
             HideGo(behaviour.gameObject);
@@ -28,6 +31,8 @@ namespace Parkitilities
 
         public void RegisterObject(ReferenceableScriptableObject scriptable)
         {
+
+            Debug.Log("Register Scriptable Object " + scriptable.name);
             ScriptableSingleton<AssetManager>.Instance.registerObject(scriptable);
             _scriptable.Add(scriptable);
         }
