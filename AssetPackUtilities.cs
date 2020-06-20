@@ -39,7 +39,7 @@ namespace Parkitilities
         {
             foreach (Attraction attractionObject in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
             {
-                if (attractionObject is TrackedRide && attractionObject.getUnlocalizedName() == attractionName)
+                if (attractionObject is TrackedRide && attractionObject.getUnlocalizedName().Equals(attractionName))
                 {
                     return (TrackedRide) attractionObject;
                 }

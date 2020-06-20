@@ -46,7 +46,7 @@ namespace Parkitilities
             TrackedRide ride = AssetPackUtilities.TrackedRide(attractionName);
             if (ride != null)
             {
-                ScriptableSingleton<AssetManager>.Instance.registerCoasterCarInstantiator(attractionName, result);
+                ScriptableSingleton<AssetManager>.Instance.registerCoasterCarInstantiator(ride.getReferenceName(), result);
                 Debug.Log("Register Coaster Ride " + attractionName);
             }
             else
@@ -64,7 +64,6 @@ namespace Parkitilities
                 throw new Exception("Display unset");
             if (!ContainsTag("MIDDLE_VEHICLE"))
                 throw new Exception("Middle Train is unset");
-
 
             TResult result = ScriptableObject.CreateInstance<TResult>();
             Apply(new TrainContainer<TResult>(loader, result));
