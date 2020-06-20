@@ -64,7 +64,7 @@ namespace Parkitilities
         {
             AddStep( "MIN_TRAIN_LENGTH", (container) =>
             {
-                container.Target.maxTrainLength = length;
+                container.Target.minTrainLength = length;
             });
             return this as TSelf;
         }

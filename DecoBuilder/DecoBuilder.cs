@@ -136,10 +136,8 @@ namespace Parkitilities
         {
             AddStep("LIGHTS_ON_NIGHT", (payload) =>
             {
-                foreach (var controller in payload.Go.GetComponents<LightController>())
-                {
-                    Object.Destroy(controller);
-                }
+                if (payload.Go.GetComponent<LightController>() == null)
+                    payload.Go.AddComponent<LightController>();
             });
             return new LightControllerBuilder<DecoBuilder<TResult>,TResult>(this);
         }

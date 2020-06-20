@@ -5,14 +5,10 @@ using UnityEngine;
 namespace Parkitilities
 {
 
-
-
     public class TrackRideBuilder<TResult> : BaseBuilder<BaseObjectContainer<TResult>>, IApply<TResult>,
         IBuildable<TResult> where TResult : TrackedRide
     {
         private GameObject _go;
-
-
 
         public TrackRideBuilder(GameObject go)
         {

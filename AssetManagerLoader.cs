@@ -8,19 +8,23 @@ namespace Parkitilities
     {
         private List<SerializedMonoBehaviour> _behaviours = new List<SerializedMonoBehaviour>();
         private List<ReferenceableScriptableObject> _scriptable = new List<ReferenceableScriptableObject>();
-        private GameObject _hider = new GameObject("Hider");
+        private GameObject _hider = null;
 
         public void HideGo(GameObject go)
         {
+            if (_hider == null)
+            {
+                _hider = new GameObject("Hider");
+                _hider.SetActive(false);
+            }
+
             Object.DontDestroyOnLoad(go);
             go.transform.SetParent(_hider.transform);
         }
 
         public void RegisterObject(SerializedMonoBehaviour behaviour)
         {
-
             Debug.Log("Register GameObject Object " + behaviour.name);
-
             behaviour.dontSerialize = true;
             behaviour.isPreview = true;
             HideGo(behaviour.gameObject);
@@ -47,8 +51,11 @@ namespace Parkitilities
             {
                 ScriptableSingleton<AssetManager>.Instance.unregisterObject(scriptable);
             }
+            _behaviours.Clear();
+            _scriptable.Clear();
 
             Object.Destroy(_hider);
+            _hider = null;
         }
     }
 }

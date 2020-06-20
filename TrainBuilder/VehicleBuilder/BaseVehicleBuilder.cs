@@ -5,6 +5,40 @@ using Object = UnityEngine.Object;
 
 namespace Parkitilities
 {
+
+    public class LightControllerBuilder<TFrom, TContainer, TResult, TSelf>
+        where TFrom : BaseVehicleBuilder<TContainer, TResult, TSelf>
+        where TSelf : class
+        where TResult : Vehicle
+        where TContainer : BaseObjectContainer<TResult>
+    {
+        private readonly TFrom _from;
+
+        public LightControllerBuilder(TFrom from)
+        {
+            _from = from;
+        }
+
+        public LightControllerBuilder<TFrom, TContainer, TResult, TSelf> Slot(int slot)
+        {
+            _from.AddStep("NIGHT_SLOT", (payload) =>
+            {
+                LightController controller = payload.Go.GetComponent<LightController>();
+                if (controller != null)
+                {
+                    controller.useCustomColors = true;
+                    controller.customColorSlot = slot;
+                }
+            });
+            return this;
+        }
+
+        public TFrom End()
+        {
+            return _from;
+        }
+    }
+
     public abstract class BaseVehicleBuilder<TContainer, TResult, TSelf> : BaseBuilder<TContainer>,
         IComponentUtilities<TSelf>, IRecolorable<TSelf>
         where TSelf : class
@@ -146,6 +180,32 @@ namespace Parkitilities
             {
                 CustomColors customColors = payload.Go.GetComponent<CustomColors>();
                 customColors.setColors(colors);
+            });
+            return this as TSelf;
+        }
+
+        public LightControllerBuilder<BaseVehicleBuilder<TContainer, TResult, TSelf>, TContainer, TResult, TSelf>
+            LightsOnAtNight()
+        {
+            AddStep("LIGHTS_ON_NIGHT", (payload) =>
+            {
+                if (payload.Go.GetComponent<LightController>() == null)
+                    payload.Go.AddComponent<LightController>();
+            });
+            return new LightControllerBuilder<
+                BaseVehicleBuilder<TContainer, TResult, TSelf>, TContainer, TResult, TSelf>(this);
+        }
+
+        public TSelf DisableLightsOnAtNight()
+        {
+            RemoveAllStepsByTag("LIGHTS_ON_NIGHT");
+            RemoveAllStepsByTag("NIGHT_SLOT");
+            AddStep("LIGHTS_ON_NIGHT", (payload) =>
+            {
+                foreach (var controller in payload.Go.GetComponents<LightController>())
+                {
+                    Object.Destroy(controller);
+                }
             });
             return this as TSelf;
         }
