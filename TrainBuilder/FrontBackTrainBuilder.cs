@@ -42,15 +42,16 @@ namespace Parkitilities
         public TResult Register(AssetManagerLoader loader, String attractionName)
         {
             TResult result = Build(loader);
-            foreach (Attraction attractionObject in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
+
+            TrackedRide ride = AssetPackUtilities.TrackedRide(attractionName);
+            if (ride != null)
             {
-                if (attractionObject is TrackedRide && attractionObject.getUnlocalizedName() == attractionName)
-                {
-                    Debug.Log("Register Attaction " + attractionName);
-                    ScriptableSingleton<AssetManager>.Instance.registerCoasterCarInstantiator(
-                        attractionObject.getReferenceName(), result);
-                    break;
-                }
+                ScriptableSingleton<AssetManager>.Instance.registerCoasterCarInstantiator(attractionName, result);
+                Debug.Log("Register Coaster Ride " + attractionName);
+            }
+            else
+            {
+                Debug.Log("Cant find Coaster Ride " + attractionName);
             }
             return result;
         }

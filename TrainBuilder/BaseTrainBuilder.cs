@@ -51,8 +51,6 @@ namespace Parkitilities
                 });
             return this as TSelf;
         }
-
-
         public TSelf MaxTrainLength(int length)
         {
             AddStep("MAX_TRAIN_LENGTH", (container) =>

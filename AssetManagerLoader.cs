@@ -31,7 +31,6 @@ namespace Parkitilities
 
         public void RegisterObject(ReferenceableScriptableObject scriptable)
         {
-
             Debug.Log("Register Scriptable Object " + scriptable.name);
             ScriptableSingleton<AssetManager>.Instance.registerObject(scriptable);
             _scriptable.Add(scriptable);

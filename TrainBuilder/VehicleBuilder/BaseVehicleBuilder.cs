@@ -20,6 +20,16 @@ namespace Parkitilities
             return this as TSelf;
         }
 
+        public TSelf Pathfinding(List<Waypoint> waypoints)
+        {
+            AddStep("WAYPOINTS", (payload) =>
+            {
+                Waypoints points = payload.Go.AddComponent<Waypoints>();
+                points.waypoints = waypoints;
+            });
+            return this as TSelf;
+        }
+
 
         public TSelf RotationalControllerStartClosed(String transform, Vector3 openAngle, int order = 0)
         {
