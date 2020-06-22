@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Parkitilities
 {
@@ -15,38 +16,48 @@ namespace Parkitilities
             _go = go;
         }
 
-        public class TrackMeshGeneratorBuilderTrackRide<TResult, TFrom> : TrackMeshGeneratorBuilder<TResult>
-            where TResult : MeshGenerator
-        {
-            private readonly TFrom _from;
-
-            public TrackMeshGeneratorBuilderTrackRide(TFrom from)
-            {
-                this._from = from;
-            }
-
-            public TFrom End()
-            {
-                return _from;
-            }
-        }
-
-
-        public TrackMeshGeneratorBuilderTrackRide<TMeshGenerator,TrackRideBuilder<TResult>> Generator<TMeshGenerator>()
+        public TrackMeshGeneratorBuilder<TMeshGenerator, TResult, TrackRideBuilder<TResult>> Generator<TMeshGenerator>()
             where TMeshGenerator : MeshGenerator
         {
-            var target = new TrackMeshGeneratorBuilderTrackRide<TMeshGenerator,TrackRideBuilder<TResult>>(this);
-            AddStep("MESH_GENERATOR", (handler) => { handler.Target.meshGenerator = target.Build(handler.Loader,handler.Target); });
+            var target = new TrackMeshGeneratorBuilder<TMeshGenerator, TResult, TrackRideBuilder<TResult>>(this);
+            AddStep("MESH_GENERATOR",
+                handler => { handler.Target.meshGenerator = ScriptableObject.CreateInstance<TMeshGenerator>(); });
             return target;
         }
 
-        // public TrackRideBuilder<TResult> MeshGenerator<TMeshGenerator>(IBuildable<TMeshGenerator> generator)
-        //     where TMeshGenerator : MeshGenerator
-        // {
-        //     AddStep("MESH_GENERATOR",
-        //         (handler) => { handler.Target.meshGenerator = generator.Build(handler.Loader); });
-        //     return this;
-        // }
+        /// <summary>
+        /// build mesh generator from target
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="loader"></param>
+        /// <typeparam name="TMeshGenerator"></typeparam>
+        /// <returns></returns>
+        public TrackMeshGeneratorBuilder<TMeshGenerator, TResult, TrackRideBuilder<TResult>> Generator<TMeshGenerator>(MeshGenerator target, AssetManagerLoader loader)
+            where TMeshGenerator : MeshGenerator
+        {
+            var builder = new TrackMeshGeneratorBuilder<TMeshGenerator, TResult, TrackRideBuilder<TResult>>(this);
+            AddStep("MESH_GENERATOR",
+                handler =>
+                {
+                    handler.Target.meshGenerator = ScriptableObject.CreateInstance<TMeshGenerator>();
+
+                    handler.Target.meshGenerator.stationPlatformGO = UnityEngine.Object.Instantiate(target.stationPlatformGO);
+                    handler.Target.meshGenerator.stationHandRailGO = UnityEngine.Object.Instantiate(target.stationHandRailGO);
+                    handler.Target.meshGenerator.material = target.material;
+                    handler.Target.meshGenerator.liftMaterial = target.liftMaterial;
+                    handler.Target.meshGenerator.frictionWheelsGO = UnityEngine.Object.Instantiate(target.frictionWheelsGO);
+                    handler.Target.meshGenerator.supportInstantiator = target.supportInstantiator;
+                    handler.Target.meshGenerator.crossBeamGO = UnityEngine.Object.Instantiate(target.crossBeamGO);
+                    handler.Target.meshGenerator.customColors = target.customColors;
+                    handler.Target.meshGenerator.tunnelMeshGenerator = target.tunnelMeshGenerator;
+                    handler.Target.meshGenerator.lsmFinGO = target.lsmFinGO;
+
+                    loader.HideGo(handler.Target.meshGenerator.frictionWheelsGO);
+                    loader.HideGo(handler.Target.meshGenerator.crossBeamGO);
+                    loader.HideGo(handler.Target.meshGenerator.stationHandRailGO);
+                });
+            return builder;
+        }
 
         public TrackRideBuilder<TResult> AddTrain<TTrain>(AssetManagerLoader loader, IBuildable<TTrain> train)
             where TTrain : CoasterCarInstantiator
@@ -64,6 +75,12 @@ namespace Parkitilities
                     handler.Target.carTypes[handler.Target.carTypes.Length - 1] = target;
                 }
             });
+            return this;
+        }
+
+        public TrackRideBuilder<TResult> ClearTrains()
+        {
+            AddStep("CLEAR_TRAIN", (handler) => { handler.Target.carTypes = new CoasterCarInstantiator[] { }; });
             return this;
         }
 
@@ -89,7 +106,8 @@ namespace Parkitilities
             return this;
         }
 
-        public TrackRideBuilder<TResult> AddTrain<TTrain>(IBuildable<TTrain> train) where TTrain : CoasterCarInstantiator
+        public TrackRideBuilder<TResult> AddTrain<TTrain>(IBuildable<TTrain> train)
+            where TTrain : CoasterCarInstantiator
         {
             AddStep("ADD_TRAIN", (handler) =>
             {
