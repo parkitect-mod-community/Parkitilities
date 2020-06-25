@@ -64,5 +64,67 @@ namespace Parkitilities
 
             return points;
         }
+
+        public static Mesh RemapSkinnedMesh(GameObject target, GameObject from)
+        {
+            var targetSkinnedMesh = target.GetComponentInChildren<SkinnedMeshRenderer>();
+            var fromSkinnedMesh = from.GetComponentInChildren<SkinnedMeshRenderer>();
+
+            var fMapping = new Dictionary<int, String>();
+            for (var x = 0; x < fromSkinnedMesh.bones.Length; x++) fMapping.Add(x, fromSkinnedMesh.bones[x].name);
+
+            var bp = new List<Matrix4x4>();
+            var nMapping = new Dictionary<String, int>();
+            for (var x = 0; x < targetSkinnedMesh.bones.Length; x++)
+            {
+                nMapping.Add(targetSkinnedMesh.bones[x].name, x);
+
+                var t = from.transform.FindRecursive(targetSkinnedMesh.bones[x].name);
+                if (t != null)
+                    bp.Add(t.worldToLocalMatrix * from.transform.localToWorldMatrix);
+                else
+                    bp.Add(targetSkinnedMesh.sharedMesh.bindposes[x]);
+            }
+            var boneWeights = new List<BoneWeight>();
+            Mesh fromMesh = fromSkinnedMesh.sharedMesh;
+            for (var x = 0; x < fromSkinnedMesh.sharedMesh.boneWeights.Length; x++)
+            {
+                var weight = new BoneWeight();
+
+                weight.boneIndex0 = RemapBone(fromSkinnedMesh.sharedMesh.boneWeights[x].boneIndex0, fMapping, nMapping);
+                weight.boneIndex1 = RemapBone(fromSkinnedMesh.sharedMesh.boneWeights[x].boneIndex1, fMapping, nMapping);
+                weight.boneIndex2 = RemapBone(fromSkinnedMesh.sharedMesh.boneWeights[x].boneIndex2, fMapping, nMapping);
+                weight.boneIndex3 = RemapBone(fromSkinnedMesh.sharedMesh.boneWeights[x].boneIndex3, fMapping, nMapping);
+
+                weight.weight0 = fromMesh.boneWeights[x].weight0;
+                weight.weight1 = fromMesh.boneWeights[x].weight1;
+                weight.weight2 = fromMesh.boneWeights[x].weight2;
+                weight.weight3 = fromMesh.boneWeights[x].weight3;
+                boneWeights.Add(weight);
+            }
+
+            Mesh mesh = targetSkinnedMesh.sharedMesh;
+            mesh.Clear();
+            mesh.vertices = fromSkinnedMesh.sharedMesh.vertices;
+            mesh.uv = fromMesh.uv;
+            mesh.triangles = fromMesh.triangles;
+            mesh.RecalculateBounds();
+            mesh.normals = fromMesh.normals;
+            mesh.tangents = fromMesh.tangents;
+
+            mesh.boneWeights = boneWeights.ToArray();
+            mesh.bindposes = bp.ToArray();
+
+            return null;
+        }
+
+        private static int RemapBone(int index, Dictionary<int, String> from, Dictionary<String, int> target)
+        {
+            var name = from[index];
+            if (target.ContainsKey(name))
+                return target[name];
+            Debug.Log("can't find bone mapping:" + name);
+            return 0;
+        }
     }
 }
