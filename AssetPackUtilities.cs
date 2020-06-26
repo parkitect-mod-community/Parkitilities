@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Parkitect.Mods.AssetPacks;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Parkitilities
@@ -8,7 +8,7 @@ namespace Parkitilities
     public static class AssetPackUtilities
     {
 
-        public static Color[] ConvertColors(List<CustomColor> colors)
+        public static Color[] ConvertColors(List<AssetPack.CustomColor> colors)
         {
             Color[] results = new Color[colors.Count];
             for (int x = 0; x < results.Length; x++)
@@ -20,7 +20,7 @@ namespace Parkitilities
             return results;
         }
 
-        public static Bounds[] ConvertBoundingBox(Parkitect.Mods.AssetPacks.BoundingBox[] boxes)
+        public static Bounds[] ConvertBoundingBox(AssetPack.BoundingBox[] boxes)
         {
             Bounds[] result = new Bounds[boxes.Length];
             for (int x = 0; x < boxes.Length; x++)
@@ -48,11 +48,16 @@ namespace Parkitilities
             return null;
         }
 
-        public static List<Waypoint> ConvertWaypoints(List<Parkitect.Mods.AssetPacks.Waypoint> waypoints)
+        public static AssetPack.AssetPack LoadAsset(String contents) {
+            return JsonConvert.DeserializeObject<AssetPack.AssetPack>(contents);
+        }
+
+        public static List<Waypoint> ConvertWaypoints(List<Parkitilities.AssetPack.Waypoint> waypoints)
         {
             List<Waypoint> points = new List<Waypoint>();
-            foreach (Parkitect.Mods.AssetPacks.Waypoint waypoint in waypoints)
+            foreach (var waypoint in waypoints)
             {
+
                 points.Add(new Waypoint
                 {
                     isOuter = waypoint.IsOuter,
