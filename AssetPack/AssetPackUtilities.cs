@@ -1,12 +1,68 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Parkitilities.AssetPack;
+using Parkitilities.ShopBuilder;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Parkitilities
 {
     public static class AssetPackUtilities
     {
+
+        public static DecoBuilder<TDeco> FromDeco<TDeco>(GameObject go, Asset asset) where TDeco : Deco
+        {
+            DecoBuilder<TDeco> builder = Parkitility.CreateDeco<TDeco>(go)
+                .Id(asset.Guid)
+                .DisplayName(asset.Name)
+                .Price(asset.Price)
+                .Category(asset.Category, asset.SubCategory)
+                .SeeThrough(asset.SeeThrough)
+                .BlockRain(asset.BlocksRain)
+                .SnapGridToCenter(asset.SnapCenter)
+                .GridSubdivisions(asset.GridSubdivision);
+
+            if (asset.IsResizable) builder.Resizable(asset.MinSize, asset.MaxSize);
+            if (asset.HasCustomColors) builder.CustomColor(ConvertColors(asset.CustomColors));
+            foreach (var bound in ConvertBoundingBox(asset.BoundingBoxes.ToArray()))
+                builder.AddBoundingBox(bound);
+
+            return builder;
+        }
+
+        /// <summary>
+        /// load in product shop, will require loading in products seperatly
+        /// </summary>
+        /// <param name="go"></param>
+        /// <param name="asset"></param>
+        /// <typeparam name="TShop"></typeparam>
+        /// <returns></returns>
+        public static ProductShopBuilder<TShop> FromProductShop<TShop>(GameObject go, Asset asset)
+            where TShop : ProductShop
+        {
+             var builder = new ProductShopBuilder<TShop>(go)
+                .DisplayName(asset.Name)
+                .Id(asset.Guid)
+                .WalkableFlag(Block.WalkableFlagType.FORWARD);
+
+             return builder;
+        }
+
+        public static CarBuilder<TCar> FromCar<TCar>(GameObject go, Asset asset) where TCar : Car
+        {
+            return new CarBuilder<TCar>(go)
+                .Id(asset.Guid)
+                .BackOffset(asset.Car.OffsetBack)
+                .FrontOffset(asset.Car.OffsetFront)
+                .CustomColor(ConvertColors(asset.CustomColors));
+        }
+
+
+        public static TResult LoadAsset<TResult>(AssetBundle bundle, string guid) where TResult : Object
+        {
+            return bundle.LoadAsset<TResult>(string.Format("Assets/Resources/AssetPack/{0}.prefab", guid));
+        }
 
         public static Color[] ConvertColors(List<AssetPack.CustomColor> colors)
         {

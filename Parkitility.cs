@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using Parkitilities.AssetPack;
+using Parkitilities.ShopBuilder;
 using UnityEngine;
 
 namespace Parkitilities
@@ -57,27 +58,17 @@ namespace Parkitilities
             }
         }
 
+        #region ProductShop
+
+        public static ProductShopBuilder<TShop> CreateProductShop<TShop>(GameObject go) where TShop : ProductShop
+        {
+            return new ProductShopBuilder<TShop>(go);
+        }
+
+        #endregion
+
         #region Deco
 
-        public static DecoBuilder<TDeco> CreateDeco<TDeco>(GameObject go, Asset asset) where TDeco : Deco
-        {
-            DecoBuilder<TDeco> builder = CreateDeco<TDeco>(go)
-                .Id(asset.Guid)
-                .DisplayName(asset.Name)
-                .Price(asset.Price)
-                .Category(asset.Category, asset.SubCategory)
-                .SeeThrough(asset.SeeThrough)
-                .BlockRain(asset.BlocksRain)
-                .SnapGridToCenter(asset.SnapCenter)
-                .GridSubdivisions(asset.GridSubdivision);
-
-            if (asset.IsResizable) builder.Resizable(asset.MinSize, asset.MaxSize);
-            if (asset.HasCustomColors) builder.CustomColor(AssetPackUtilities.ConvertColors(asset.CustomColors));
-            foreach (var bound in AssetPackUtilities.ConvertBoundingBox(asset.BoundingBoxes.ToArray()))
-                builder.AddBoundingBox(bound);
-
-            return builder;
-        }
 
         public static DecoBuilder<TDeco> CreateDeco<TDeco>(GameObject go) where TDeco : Deco
         {
@@ -89,9 +80,25 @@ namespace Parkitilities
             return CreateDeco<Deco>(go);
         }
 
+        public static ConsumableProductBuilder<TItem> CreateConsumableProduct<TItem>(GameObject go) where TItem : ConsumableProduct
+        {
+            return new ConsumableProductBuilder<TItem>(go);
+        }
+
+        public static WearableProductBuilder<TItem> CreateWearableProduct<TItem>(GameObject go) where TItem : WearableProduct
+        {
+            return new WearableProductBuilder<TItem>(go);
+        }
+
+        public static OngoingProductBuilder<TItem> CreateOnGoingProduct<TItem>(GameObject go) where TItem : OngoingEffectProduct
+        {
+            return new OngoingProductBuilder<TItem>(go);
+        }
+
         #endregion
 
         #region Vehicle
+
 
         public static CarBuilder<Car> CreateCar(GameObject go)
         {
@@ -112,15 +119,6 @@ namespace Parkitilities
         public static CarBuilder<TCar> CreateCar<TCar>(GameObject go) where TCar : Car
         {
             return new CarBuilder<TCar>(go);
-        }
-
-        public static CarBuilder<TCar> FromCar<TCar>(GameObject go, Asset asset) where TCar : Car
-        {
-            return new CarBuilder<TCar>(go)
-                .Id(asset.Guid)
-                .BackOffset(asset.Car.OffsetBack)
-                .FrontOffset(asset.Car.OffsetFront)
-                .CustomColor(AssetPackUtilities.ConvertColors(asset.CustomColors));
         }
 
         #endregion
@@ -198,6 +196,13 @@ namespace Parkitilities
                         materials[i] = colorSpecularIllum;
                     else if (materials[i].name.StartsWith("CustomColorsSpecular"))
                         materials[i] = colorSpecular;
+                    else
+                    {
+                        Material material2 = new Material(ScriptableSingleton<AssetManager>.Instance.standardShader);
+                        material2.CopyPropertiesFromMaterial(materials[i]);
+                        material2.enableInstancing = true;
+                        materials[i] = material2;
+                    }
                 }
             }
 

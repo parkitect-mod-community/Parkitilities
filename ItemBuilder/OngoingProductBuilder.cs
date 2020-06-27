@@ -1,8 +1,16 @@
+using UnityEngine;
+
 namespace Parkitilities.ShopBuilder
 {
     public class OngoingProductBuilder<TResult>: BaseProductBuilder<TResult, OngoingProductBuilder<TResult>>, IBuildable<TResult>
         where TResult : OngoingEffectProduct
     {
+        private readonly GameObject _go;
+
+        public OngoingProductBuilder(GameObject go)
+        {
+            _go = go;
+        }
 
         public OngoingProductBuilder<TResult> Duration(int duration)
         {
@@ -24,7 +32,23 @@ namespace Parkitilities.ShopBuilder
 
         public TResult Build(AssetManagerLoader loader)
         {
-            throw new System.NotImplementedException();
+            GameObject go = Object.Instantiate(_go);
+
+            TResult product = go.GetComponent<TResult>();
+            if (product == null)
+            {
+                product = go.AddComponent<TResult>();
+            }
+
+            Apply(new BaseObjectContainer<TResult>(loader, product, go));
+            foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
+            {
+                Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
+            }
+
+            // register shop
+            loader.RegisterObject(product);
+            return product;
         }
     }
 }

@@ -103,4 +103,76 @@ namespace Parkitilities.AssetPack
         public EffectTypes Type { get; set; }
         public float Amount { get; set; }
     }
+
+    public static class ProductShopUtility
+    {
+        public static Hand.Side ConvertToSide(HandSide side)
+        {
+            if (side == HandSide.LEFT) return Hand.Side.LEFT;
+            return Hand.Side.RIGHT;
+        }
+
+        public static TemperaturePreference ConvertTemperaturePreference(Temperature temperature)
+        {
+            switch (temperature)
+            {
+                case Temperature.HOT: return TemperaturePreference.HOT;
+                case Temperature.COLD: return TemperaturePreference.COLD;
+            }
+
+            return TemperaturePreference.NONE;
+        }
+
+        public static WearableProduct.SeasonalPreference ConvertSeasonalPreference(Seasonal seasonal)
+        {
+            switch (seasonal)
+            {
+                case Seasonal.AUTUMN: return WearableProduct.SeasonalPreference.AUTUMN;
+                case Seasonal.SPRING: return WearableProduct.SeasonalPreference.SPRING;
+                case Seasonal.SUMMER: return WearableProduct.SeasonalPreference.SUMMER;
+                case Seasonal.WINTER: return WearableProduct.SeasonalPreference.WINTER;
+            }
+
+            return WearableProduct.SeasonalPreference.NONE;
+        }
+
+        public static WearableProduct.BodyLocation ConvertBodyLocation(Body body)
+        {
+            switch (body)
+            {
+                case Body.BACK: return WearableProduct.BodyLocation.BACK;
+                case Body.FACE: return WearableProduct.BodyLocation.FACE;
+                case Body.HEAD: return WearableProduct.BodyLocation.HEAD;
+            }
+
+            return WearableProduct.BodyLocation.HEAD;
+        }
+
+        public static ConsumableEffect.AffectedStat ConvertEffectType(EffectTypes type)
+        {
+            switch (type)
+            {
+                case EffectTypes.HUNGER: return ConsumableEffect.AffectedStat.HUNGER;
+                case EffectTypes.THIRST: return ConsumableEffect.AffectedStat.THIRST;
+                case EffectTypes.HAPPINESS: return ConsumableEffect.AffectedStat.HAPPINESS;
+                case EffectTypes.TIREDNESS: return ConsumableEffect.AffectedStat.TIREDNESS;
+                case EffectTypes.SUGARBOOST: return ConsumableEffect.AffectedStat.SUGARBOOST;
+            }
+
+            return ConsumableEffect.AffectedStat.HUNGER;
+        }
+
+        public static ConsumableProduct.ConsumeAnimation ConvertConsumeAnimation(ConsumeAnimation animation)
+        {
+            switch (animation)
+            {
+                case ConsumeAnimation.LICK: return ConsumableProduct.ConsumeAnimation.LICK;
+                case ConsumeAnimation.GENERIC: return ConsumableProduct.ConsumeAnimation.GENERIC;
+                case ConsumeAnimation.WITH_HANDS: return ConsumableProduct.ConsumeAnimation.WITH_HANDS;
+                case ConsumeAnimation.DRINK_STRAW: return ConsumableProduct.ConsumeAnimation.DRINK_STRAW;
+            }
+
+            return ConsumableProduct.ConsumeAnimation.GENERIC;
+        }
+    }
 }

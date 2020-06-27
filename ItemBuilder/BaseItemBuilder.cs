@@ -10,23 +10,38 @@ namespace Parkitilities.ShopBuilder
         where TSelf : class
     {
 
+        public TSelf HandSide(Hand.Side side) {
+            AddStep("GUID", handler =>
+            {
+                handler.Target.handSide = side;
+            });
+            return this as TSelf;
+        }
+
+
+        public TSelf Id(string id) {
+            AddStep("GUID", handler =>
+            {
+                handler.Target.name = id;
+            });
+            return this as TSelf;
+        }
+
+
         public TSelf DisplayName(String display)
         {
-            AddStep("DISPLAY", (handler) =>
+            AddStep("DISPLAY", handler =>
             {
-                FieldInfo fieldInfo = typeof(TResult).GetField("displayName",
-                    BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic);
-                if (fieldInfo != null)
-                {
-                    fieldInfo.SetValue(handler.Target, display);
-                }
+                typeof(Item).GetField("displayName", BindingFlags.NonPublic
+                                                     | BindingFlags.Instance)
+                    ?.SetValue(handler.Target, display);
             });
             return this as TSelf;
         }
 
         public TSelf TwoHanded(bool state)
         {
-            AddStep("TWO_HANDED", (handler) =>
+            AddStep("TWO_HANDED", handler =>
             {
                 handler.Target.isTwoHanded = state;
             });
@@ -34,7 +49,7 @@ namespace Parkitilities.ShopBuilder
         }
 
         public TSelf InterestingToLookAt( bool state){
-            AddStep("INTERESTING_TO_LOOK_AT", (handler) =>
+            AddStep("INTERESTING_TO_LOOK_AT", handler =>
             {
                 handler.Target.interestingToLookAt = state;
             });

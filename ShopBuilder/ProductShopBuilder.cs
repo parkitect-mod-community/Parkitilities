@@ -11,7 +11,6 @@ namespace Parkitilities.ShopBuilder
     {
         private readonly GameObject _go;
 
-
         public ProductShopBuilder(GameObject go)
         {
             _go = go;
@@ -24,12 +23,21 @@ namespace Parkitilities.ShopBuilder
             return this;
         }
 
-        public ProductShopBuilder<TResult> AddProduct(AssetManagerLoader loader, IBuildable<Product> product)
+        public ProductShopBuilder<TResult> AddProduct<TTarget>(AssetManagerLoader loader, IBuildable<TTarget> product)
+            where TTarget: Product
         {
             AddStep("PRODUCT", (payload) =>
             {
-                Array.Resize(ref payload.Target.products, payload.Target.products.Length + 1);
-                payload.Target.products[payload.Target.products.Length - 1] = product.Build(loader);
+                if (payload.Target.products == null)
+                {
+                    payload.Target.products = new[] {product.Build(loader)};
+                }
+                else
+                {
+
+                    Array.Resize(ref payload.Target.products, payload.Target.products.Length + 1);
+                    payload.Target.products[payload.Target.products.Length - 1] = product.Build(loader);
+                }
             });
             return this;
         }
@@ -38,8 +46,16 @@ namespace Parkitilities.ShopBuilder
         {
             AddStep("PRODUCT", (payload) =>
             {
-                Array.Resize(ref payload.Target.products, payload.Target.products.Length + 1);
-                payload.Target.products[payload.Target.products.Length - 1] = product;
+                if (payload.Target.products == null)
+                {
+                    payload.Target.products = new[] {product};
+                }
+                else
+                {
+                    Array.Resize(ref payload.Target.products, payload.Target.products.Length + 1);
+                    payload.Target.products[payload.Target.products.Length - 1] = product;
+                }
+
             });
             return this;
         }
@@ -66,5 +82,6 @@ namespace Parkitilities.ShopBuilder
             loader.RegisterObject(shop);
             return shop;
         }
+
     }
 }

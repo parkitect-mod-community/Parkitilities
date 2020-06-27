@@ -98,6 +98,15 @@ namespace Parkitilities.ShopBuilder
         where TSelf : class
     {
 
+        public TSelf DefaultPrice(float price)
+        {
+            AddStep("DEFAULT_PRICE", handler =>
+            {
+                handler.Target.defaultPrice = price;
+            });
+            return this as TSelf;
+        }
+
         public TSelf ClearIngredient(AssetManagerLoader loader)
         {
             RemoveAllStepsByTag("INGREDIENT");
@@ -113,8 +122,15 @@ namespace Parkitilities.ShopBuilder
             IngredientBuilder<TSelf> builder = new IngredientBuilder<TSelf>(this as TSelf);
             AddStep("INGREDIENT", handler =>
             {
-                Array.Resize(ref handler.Target.ingredients, handler.Target.ingredients.Length + 1);
-                handler.Target.ingredients[handler.Target.ingredients.Length - 1] = builder.Build(loader);
+                if (handler.Target.ingredients == null)
+                {
+                    handler.Target.ingredients = new[] {builder.Build(loader)};
+                }
+                else
+                {
+                    Array.Resize(ref handler.Target.ingredients, handler.Target.ingredients.Length + 1);
+                    handler.Target.ingredients[handler.Target.ingredients.Length - 1] = builder.Build(loader);
+                }
             });
             return builder;
         }

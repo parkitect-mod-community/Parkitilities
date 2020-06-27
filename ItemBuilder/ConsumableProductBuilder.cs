@@ -1,33 +1,44 @@
 using System;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Parkitilities.ShopBuilder
 {
+    public static class TrashType
+    {
+        public static Trash ChipBagTrash
+        {
+            get { return AssetManager.Instance.getPrefab<Trash>("ChipBagTrash"); }
+        }
+
+        public static Trash PopCanTrash
+        {
+            get { return AssetManager.Instance.getPrefab<Trash>("PopCanTrash"); }
+        }
+
+        public static Trash MeatLegTrash
+        {
+            get { return AssetManager.Instance.getPrefab<Trash>("MeatLegTrash"); }
+        }
+
+        public static Trash BubbleTeaTrash
+        {
+            get { return AssetManager.Instance.getPrefab<Trash>("BubbleTeaTrash"); }
+        }
+    }
+
+
     public class ConsumableProductBuilder<TResult> : BaseProductBuilder<TResult, ConsumableProductBuilder<TResult>>,
         IBuildable<TResult>
         where TResult : ConsumableProduct
     {
 
-        public static class TrashType
+        private readonly GameObject _go;
+
+
+        public ConsumableProductBuilder(GameObject go)
         {
-            public static Trash ChipBagTrash
-            {
-                get { return AssetManager.Instance.getPrefab<Trash>("ChipBagTrash"); }
-            }
-
-            public static Trash PopCanTrash
-            {
-                get { return AssetManager.Instance.getPrefab<Trash>("PopCanTrash"); }
-            }
-
-            public static Trash MeatLegTrash
-            {
-                get { return AssetManager.Instance.getPrefab<Trash>("MeatLegTrash"); }
-            }
-
-            public static Trash BubbleTeaTrash
-            {
-                get { return AssetManager.Instance.getPrefab<Trash>("BubbleTeaTrash"); }
-            }
+            _go = go;
         }
 
         /// <summary>
@@ -62,7 +73,23 @@ namespace Parkitilities.ShopBuilder
 
         public TResult Build(AssetManagerLoader loader)
         {
-            throw new System.NotImplementedException();
+            GameObject go = Object.Instantiate(_go);
+
+            TResult product = go.GetComponent<TResult>();
+            if (product == null)
+            {
+                product = go.AddComponent<TResult>();
+            }
+
+            Apply(new BaseObjectContainer<TResult>(loader, product, go));
+            foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
+            {
+                Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
+            }
+
+            // register shop
+            loader.RegisterObject(product);
+            return product;
         }
     }
 }

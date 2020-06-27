@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Parkitilities.ShopBuilder
 {
@@ -9,7 +10,6 @@ namespace Parkitilities.ShopBuilder
         where TContainer : BaseObjectContainer<TResult>
         where TSelf : class
     {
-
 
         public TSelf WalkableFlag(Block.WalkableFlagType flagType)
         {
@@ -31,6 +31,32 @@ namespace Parkitilities.ShopBuilder
             });
             return this as TSelf;
         }
+
+        public TSelf AddBoundingBox(Bounds bound,
+            BoundingVolume.Layers layers = BoundingVolume.Layers.Buildvolume)
+        {
+            AddStep("BOUNDING_BOX", (payload) =>
+            {
+                BoundingBox b = payload.Go.AddComponent<BoundingBox>();
+                b.setBounds(bound);
+                b.layers = layers;
+            });
+            return this as TSelf;
+        }
+
+        public TSelf ClearBoundingBoxes()
+        {
+            RemoveAllStepsByTag("BOUNDING_BOX");
+            AddStep("BOUNDING_BOX", (payload) =>
+            {
+                foreach (var comp in payload.Go.GetComponents<BoundingBox>())
+                {
+                    Object.Destroy(comp);
+                }
+            });
+            return this as TSelf;
+        }
+
 
     }
 }
