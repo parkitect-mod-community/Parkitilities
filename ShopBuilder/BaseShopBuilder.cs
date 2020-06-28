@@ -32,6 +32,17 @@ namespace Parkitilities.ShopBuilder
             return this as TSelf;
         }
 
+
+        public TSelf Price(float price)
+        {
+            AddStep("PRICE", (handler) =>
+            {
+                handler.Target.price = price;
+            });
+            return this as TSelf;
+        }
+
+
         public TSelf AddBoundingBox(Bounds bound,
             BoundingVolume.Layers layers = BoundingVolume.Layers.Buildvolume)
         {
