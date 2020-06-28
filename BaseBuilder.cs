@@ -65,10 +65,13 @@ namespace Parkitilities
 
         protected void Apply(TPayload target)
         {
+            Debug.Log("-------------------------------------------------------");
             foreach (var action in _actions)
             {
+                Debug.Log("Applying Action:" + action.Tag );
                 action.Handler(target);
             }
+            Debug.Log("-------------------------------------------------------");
         }
     }
 }
