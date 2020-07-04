@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Parkitilities.AssetPack
@@ -60,7 +61,9 @@ namespace Parkitilities.AssetPack
     {
         public List<ShopIngredient> Ingredients = new List<ShopIngredient>();
         public ProductType ProductType { get; set; }
+
         public string Guid { get; set; }
+        public string TrashGuid { get; set; }
 
         //base
         public string Name { get; set; }
@@ -86,6 +89,11 @@ namespace Parkitilities.AssetPack
         public ConsumeAnimation ConsumeAnimation { get; set; }
         public Temperature Temprature { get; set; }
         public int Portions { get; set; }
+
+        //trash
+        public float DisgustFactor = .5f;
+        public float Volume = .1f;
+        public bool CanWiggle = true;
     }
 
     public class ShopIngredient

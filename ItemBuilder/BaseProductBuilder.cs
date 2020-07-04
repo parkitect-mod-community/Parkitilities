@@ -7,7 +7,6 @@ namespace Parkitilities.ShopBuilder
     public class IngredientBuilder<TSelf> : IBuildable<Ingredient>
     {
         private readonly TSelf _from;
-        private Ingredient _ingredient = new Ingredient();
         List<ConsumableEffect> _effects = new List<ConsumableEffect>();
         private String _displayName;
         private float _cost;

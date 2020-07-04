@@ -27,6 +27,72 @@ namespace Parkitilities.ShopBuilder
         }
     }
 
+    public class TrashBuilder<TSelf, TResult> : BaseItemBuilder<BaseObjectContainer<TResult>, TResult, TrashBuilder<TSelf,TResult>>,
+        IBuildable<Trash> where TResult : Trash
+    {
+        private readonly TSelf _from;
+        private readonly GameObject _go;
+
+
+        public TrashBuilder(TSelf from, GameObject go)
+        {
+            _go = go;
+            _from = from;
+        }
+
+        public TrashBuilder<TSelf, TResult> Disgust(float value)
+        {
+            AddStep("DISGUST", container =>
+            {
+                container.Target.disgustFactor = value;
+            });
+            return this;
+        }
+
+        public TrashBuilder<TSelf, TResult> Volume(float value)
+        {
+            AddStep("VOLUME", container =>
+            {
+                container.Target.volume = value;
+            });
+            return this;
+        }
+
+        public TrashBuilder<TSelf, TResult> CanWiggle(bool value)
+        {
+            AddStep("CAN_WIGGLE", container =>
+            {
+                container.Target.canWiggle = value;
+            });
+            return this;
+        }
+
+
+        public TSelf End()
+        {
+            return _from;
+        }
+
+
+        public Trash Build(AssetManagerLoader loader)
+        {
+            GameObject go = UnityEngine.Object.Instantiate(_go);
+            TResult trash = go.GetComponent<TResult>();
+            if (trash == null)
+            {
+                trash = go.AddComponent<TResult>();
+            }
+            Apply(new BaseObjectContainer<TResult>(loader, trash, go));
+            foreach (Renderer componentsInChild in go.GetComponentsInChildren<Renderer>())
+            {
+                Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
+            }
+
+            loader.RegisterObject(trash);
+            return trash;
+        }
+    }
+
 
     public class ConsumableProductBuilder<TResult> : BaseProductBuilder<TResult, ConsumableProductBuilder<TResult>>,
         IBuildable<TResult>
@@ -41,17 +107,16 @@ namespace Parkitilities.ShopBuilder
             _go = go;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="trash"></param>
-        /// <returns></returns>
-        public ConsumableProductBuilder<TResult> Trash(Trash trash)
+
+        public TrashBuilder<ConsumableProductBuilder<TResult>, TTrashResult> Trash<TTrashResult>(GameObject trashGo,
+            AssetManagerLoader loader) where TTrashResult : Trash
         {
-            //TODO: ADD Trash configuration
-            AddStep("TRASH", (handler) => { handler.Target.trash = trash; });
-            return this;
+            TrashBuilder<ConsumableProductBuilder<TResult>, TTrashResult> builder =
+                new TrashBuilder<ConsumableProductBuilder<TResult>, TTrashResult>(this, trashGo);
+            AddStep("TRASH", handler => { handler.Target.trash = builder.Build(loader); });
+            return builder;
         }
+
 
         public ConsumableProductBuilder<TResult> ConsumeAnimation(ConsumableProduct.ConsumeAnimation animation)
         {

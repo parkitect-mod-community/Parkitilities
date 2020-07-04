@@ -1,9 +1,10 @@
 using System;
 using System.Reflection;
-using UnityEngine;
 
 namespace Parkitilities.ShopBuilder
 {
+
+
     public class BaseItemBuilder<TContainer, TResult, TSelf> : BaseBuilder<TContainer>
         where TResult : Item
         where TContainer : BaseObjectContainer<TResult>
@@ -26,6 +27,7 @@ namespace Parkitilities.ShopBuilder
             });
             return this as TSelf;
         }
+
 
 
         public TSelf DisplayName(String display)
