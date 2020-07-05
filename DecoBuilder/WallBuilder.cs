@@ -1,19 +1,32 @@
-
 using System;
 using UnityEngine;
 
 namespace Parkitilities
 {
-    public class DecoBuilder<TResult> : BaseDecoBuilder<BaseObjectContainer<TResult>, TResult, DecoBuilder<TResult>>,
-        IBuildable<TResult>
-        where TResult : Deco
+    public class WallBuilder<TResult> : BaseDecoBuilder<BaseObjectContainer<TResult>, TResult, WallBuilder<TResult>>
+        where TResult : Wall
     {
+
         private readonly GameObject _go;
 
-        public DecoBuilder(GameObject go)
+        public WallBuilder(GameObject go)
         {
             _go = go;
             FindAndAttachComponent<OnlyActiveInBuildMode>("BuildMode");
+        }
+
+        public WallBuilder<TResult> BlockSides(Wall.BlockedSide blockedSide)
+        {
+            AddStep("BLOCK_SIDES",
+                (payload) => { payload.Target.blockedSides = blockedSide; });
+            return this;
+        }
+
+        public WallBuilder<TResult> RemoveAdjacentHandRails(bool value)
+        {
+            AddStep("REMOVE_HAND_RAILS",
+                (payload) => { payload.Target.removeAdjacentHandrails = value; });
+            return this;
         }
 
         public TResult Build(AssetManagerLoader loader)
@@ -33,7 +46,6 @@ namespace Parkitilities
             {
                 Parkitility.ReplaceWithParkitectMaterial(componentsInChild);
             }
-
             // register deco
             loader.RegisterObject(deco);
             return deco;

@@ -80,6 +80,16 @@ namespace Parkitilities
             return CreateDeco<Deco>(go);
         }
 
+        public static WallBuilder<Wall> CreateWall(GameObject go)
+        {
+            return CreateWall<Wall>(go);
+        }
+
+        public static WallBuilder<TWall> CreateWall<TWall>(GameObject go) where TWall : Wall
+        {
+            return new WallBuilder<TWall>(go);
+        }
+
         public static ConsumableProductBuilder<TItem> CreateConsumableProduct<TItem>(GameObject go) where TItem : ConsumableProduct
         {
             return new ConsumableProductBuilder<TItem>(go);

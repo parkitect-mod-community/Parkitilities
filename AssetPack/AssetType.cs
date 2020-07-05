@@ -14,6 +14,7 @@ namespace Parkitilities.AssetPack
         ImageSign,
         Train,
         Shop,
+        Door,
         Generic
     }
 }

@@ -29,7 +29,6 @@ namespace Parkitilities.ShopBuilder
             return this;
         }
 
-
         public TResult Build(AssetManagerLoader loader)
         {
             GameObject go = Object.Instantiate(_go);

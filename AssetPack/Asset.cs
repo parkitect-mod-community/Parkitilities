@@ -16,6 +16,7 @@ namespace Parkitilities.AssetPack
         public string Guid;
         public string Name;
         public Parkitect.Mods.AssetPacks.AssetType Type { get; set; }
+        public bool LoadAsset { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         public AssetType TargetType { get; set; }
@@ -28,7 +29,7 @@ namespace Parkitilities.AssetPack
         public float GridSubdivision;
         public float HeightDelta;
         public bool HasCustomColors;
-        public List<CustomColor> CustomColors;
+        public List<CustomColor> CustomColors = new List<CustomColor>();
         public int ColorCount;
         public bool IsResizable;
         public bool SeeThrough;

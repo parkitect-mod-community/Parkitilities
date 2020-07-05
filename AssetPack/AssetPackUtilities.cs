@@ -16,7 +16,7 @@ namespace Parkitilities
             DecoBuilder<TDeco> builder = Parkitility.CreateDeco<TDeco>(go)
                 .Id(asset.Guid)
                 .DisplayName(asset.Name)
-                .Price(asset.Price)
+                .Price(asset.Price, false)
                 .Category(asset.Category, asset.SubCategory)
                 .SeeThrough(asset.SeeThrough)
                 .BlockRain(asset.BlocksRain)
@@ -64,10 +64,17 @@ namespace Parkitilities
             return bundle.LoadAsset<TResult>(string.Format("Assets/Resources/AssetPack/{0}.prefab", guid));
         }
 
-        public static Color[] ConvertColors(List<AssetPack.CustomColor> colors)
+        public static Color[] ConvertColors(List<CustomColor> colors)
         {
-            Color[] results = new Color[colors.Count];
-            for (int x = 0; x < results.Length; x++)
+            return ConvertColors(colors, colors.Count);
+        }
+
+        public static Color[] ConvertColors(List<CustomColor> colors, int count)
+        {
+            Color[] results = new Color[count];
+            if (count == 0)
+                return results;
+            for (int x = 0; x < count; x++)
             {
                 results[x] = new Color(colors[x].Red, colors[x].Green,
                     colors[x].Blue, colors[x].Alpha);
