@@ -61,7 +61,10 @@ namespace Parkitilities
 
         public static TResult LoadAsset<TResult>(AssetBundle bundle, string guid) where TResult : Object
         {
-            return bundle.LoadAsset<TResult>(string.Format("Assets/Resources/AssetPack/{0}.prefab", guid));
+            TResult result = bundle.LoadAsset<TResult>(string.Format("Assets/Resources/AssetPack/{0}.prefab", guid));
+            if (result == null)
+                Debug.Log("Failed to load asset for: " + guid);
+            return result;
         }
 
         public static Color[] ConvertColors(List<CustomColor> colors)
@@ -135,6 +138,12 @@ namespace Parkitilities
 
         public static Mesh RemapSkinnedMesh(GameObject target, GameObject from)
         {
+            target.transform.rotation = new Quaternion();
+            from.transform.rotation = new Quaternion();
+
+            target.transform.position = new Vector3();
+            from.transform.position = new Vector3();
+
             var targetSkinnedMesh = target.GetComponentInChildren<SkinnedMeshRenderer>();
             var fromSkinnedMesh = from.GetComponentInChildren<SkinnedMeshRenderer>();
 
@@ -147,9 +156,9 @@ namespace Parkitilities
             {
                 nMapping.Add(targetSkinnedMesh.bones[x].name, x);
 
-                var t = from.transform.FindRecursive(targetSkinnedMesh.bones[x].name);
+                var t = target.transform.FindRecursive(targetSkinnedMesh.bones[x].name);
                 if (t != null)
-                    bp.Add(t.worldToLocalMatrix * from.transform.localToWorldMatrix);
+                    bp.Add(t.worldToLocalMatrix * target.transform.localToWorldMatrix);
                 else
                     bp.Add(targetSkinnedMesh.sharedMesh.bindposes[x]);
             }
@@ -171,7 +180,7 @@ namespace Parkitilities
                 boneWeights.Add(weight);
             }
 
-            Mesh mesh = targetSkinnedMesh.sharedMesh;
+            Mesh mesh = Object.Instantiate(targetSkinnedMesh.sharedMesh);
             mesh.Clear();
             mesh.vertices = fromSkinnedMesh.sharedMesh.vertices;
             mesh.uv = fromMesh.uv;
@@ -182,8 +191,11 @@ namespace Parkitilities
 
             mesh.boneWeights = boneWeights.ToArray();
             mesh.bindposes = bp.ToArray();
+            targetSkinnedMesh.sharedMesh = mesh;
 
-            return null;
+            targetSkinnedMesh.sharedMaterial = fromSkinnedMesh.material;
+
+            return mesh;
         }
 
         private static int RemapBone(int index, Dictionary<int, String> from, Dictionary<String, int> target)

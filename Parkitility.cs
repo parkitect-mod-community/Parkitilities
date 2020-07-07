@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using Parkitilities.AssetPack;
+using Parkitilities.NPCBuilder;
 using Parkitilities.ShopBuilder;
 using UnityEngine;
 
@@ -175,6 +176,16 @@ namespace Parkitilities
 
         #endregion
 
+        #region NPC
+        public static BodyPartBuilder CreateBodyPart()
+        {
+            return new BodyPartBuilder();
+        }
+        public static CostumeBuilder CostumeBuilder()
+        {
+            return new CostumeBuilder();
+        }
+        #endregion
 
         #region Utilities
 

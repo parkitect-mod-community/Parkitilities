@@ -227,6 +227,7 @@ namespace Parkitilities
         public TSelf CustomColor(Color c1, Color c2, Color c3, Color c4)
         {
             return CustomColor(new[] {c1, c2, c3, c4});
+
         }
 
         public TSelf CustomColor(Color[] colors)

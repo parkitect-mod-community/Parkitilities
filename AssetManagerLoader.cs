@@ -10,7 +10,7 @@ namespace Parkitilities
         private List<ReferenceableScriptableObject> _scriptable = new List<ReferenceableScriptableObject>();
         private GameObject _hider = null;
 
-        public void HideGo(GameObject go)
+        public GameObject HideGo(GameObject go)
         {
             if (_hider == null)
             {
@@ -20,6 +20,7 @@ namespace Parkitilities
 
             Object.DontDestroyOnLoad(go);
             go.transform.SetParent(_hider.transform);
+            return go;
         }
 
         public void RegisterObject(SerializedMonoBehaviour behaviour)

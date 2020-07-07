@@ -12,8 +12,22 @@ namespace Parkitilities
             Go = go;
         }
 
+
         public AssetManagerLoader Loader { get; }
         public T Target { get; }
         public GameObject Go { get; }
+    }
+
+    public class BaseContainer<T>
+    {
+
+        public BaseContainer(AssetManagerLoader loader, T target)
+        {
+            Loader = loader;
+            Target = target;
+        }
+
+        public AssetManagerLoader Loader { get; }
+        public T Target { get; }
     }
 }
