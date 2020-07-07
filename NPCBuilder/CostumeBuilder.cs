@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using TMPro;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 
 namespace Parkitilities.NPCBuilder
 {
@@ -9,7 +13,7 @@ namespace Parkitilities.NPCBuilder
 
         public CostumeBuilder Id(String id)
         {
-            AddStep("DISPLAY_NAME", (handler) => { handler.Target.name = id; });
+            AddStep("GUID", (handler) => { handler.Target.name = id; });
             return this;
         }
 
@@ -25,10 +29,40 @@ namespace Parkitilities.NPCBuilder
             return this;
         }
 
-        public CostumeBuilder CostumeSprite(String name, Sprite sprite)
+        public CostumeBuilder CostumeSprite(String name, Sprite sprite, float width, float height)
         {
             AddStep("COSTUME_SPRITE", (handler) =>
             {
+                // set texture
+                var spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
+                spriteAsset.spriteInfoList = new List<TMP_Sprite>();
+                spriteAsset.spriteInfoList.Add(new TMP_Sprite()
+                {
+                    name = "ui_icon_entertainer_" + name,
+                    unicode = 0,
+                    scale = 1.0f,
+                    sprite = sprite,
+                    height = height,
+                    width = width,
+                    pivot = new Vector2(0, 0),
+                    x = 0,
+                    y = 0,
+                    yOffset = height,
+                    xAdvance = width
+                });
+                spriteAsset.spriteSheet = sprite.texture;
+                ShaderUtilities.GetShaderPropertyIDs();
+                Material material = new Material(Shader.Find("TextMeshPro/Sprite"));
+                material.SetTexture(ShaderUtilities.ID_MainTex, spriteAsset.spriteSheet);
+                material.hideFlags = HideFlags.HideInHierarchy;
+                spriteAsset.material = material;
+                spriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode("ui_icon_entertainer_panda");
+                typeof(TMP_SpriteAsset).GetField("m_FaceInfo",
+                        BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.SetValue(spriteAsset, FontEngine.GetFaceInfo());
+                spriteAsset.UpdateLookupTables();
+                MaterialReferenceManager.AddSpriteAsset(spriteAsset);
+
                 handler.Target.costumeSpriteName = name;
                 handler.Target.customeSprite = sprite;
             });
