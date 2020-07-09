@@ -56,7 +56,7 @@ namespace Parkitilities.NPCBuilder
                 material.SetTexture(ShaderUtilities.ID_MainTex, spriteAsset.spriteSheet);
                 material.hideFlags = HideFlags.HideInHierarchy;
                 spriteAsset.material = material;
-                spriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode("ui_icon_entertainer_panda");
+                spriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode("ui_icon_entertainer_" + name);
                 typeof(TMP_SpriteAsset).GetField("m_FaceInfo",
                         BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.SetValue(spriteAsset, FontEngine.GetFaceInfo());
