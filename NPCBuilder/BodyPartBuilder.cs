@@ -147,7 +147,6 @@ namespace Parkitilities.NPCBuilder
                 typeof(BodyPartsContainer)
                     .GetField("hairstyles", BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.SetValue(_container, new GameObject[]{});
-
                 typeof(BodyPartsContainer)
                     .GetField("accessories", BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic)
                     ?.SetValue(_container, new WearableProduct[] { });

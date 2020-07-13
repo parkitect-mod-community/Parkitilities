@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -145,16 +146,24 @@ namespace Parkitilities.NPCBuilder
         {
             var employeeCostume = ScriptableObject.CreateInstance<EmployeeCostume>();
             employeeCostume.customColors = new Color[] { };
-            loader.RegisterObject(employeeCostume);
             Apply(new BaseContainer<EmployeeCostume>(loader, employeeCostume));
+            loader.RegisterObject(employeeCostume);
             return employeeCostume;
         }
 
         public EmployeeCostume Register(AssetManagerLoader loader, Entertainer entertainer)
         {
             Array.Resize(ref entertainer.costumes, entertainer.costumes.Length + 1);
-            entertainer.costumes[entertainer.costumes.Length - 1] = Build(loader);
+            EmployeeCostume costume = Build(loader);
+            entertainer.costumes[entertainer.costumes.Length - 1] = costume;
+            String id = costume.name;
+            loader.AddUnregisterHandler(() =>
+            {
+                entertainer.costumes = entertainer.costumes.Where((source, index) => !source.name.Equals(id)).ToArray();
+            });
+
             return entertainer.costumes[entertainer.costumes.Length - 1];
+
         }
 
     }

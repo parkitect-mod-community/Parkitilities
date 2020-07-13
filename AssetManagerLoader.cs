@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -9,6 +10,7 @@ namespace Parkitilities
         private List<SerializedMonoBehaviour> _behaviours = new List<SerializedMonoBehaviour>();
         private List<ReferenceableScriptableObject> _scriptable = new List<ReferenceableScriptableObject>();
         private GameObject _hider = null;
+        private List<Action> handlers = new List<Action>();
 
         public GameObject HideGo(GameObject go)
         {
@@ -21,6 +23,11 @@ namespace Parkitilities
             Object.DontDestroyOnLoad(go);
             go.transform.SetParent(_hider.transform);
             return go;
+        }
+
+        public void AddUnregisterHandler(Action handler)
+        {
+            handlers.Add(handler);
         }
 
         public void RegisterObject(SerializedMonoBehaviour behaviour)
@@ -52,6 +59,12 @@ namespace Parkitilities
             {
                 ScriptableSingleton<AssetManager>.Instance.unregisterObject(scriptable);
             }
+
+            foreach (var handler in handlers)
+            {
+                handler();
+            }
+
             _behaviours.Clear();
             _scriptable.Clear();
 
