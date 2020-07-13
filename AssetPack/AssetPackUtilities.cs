@@ -193,7 +193,7 @@ namespace Parkitilities
             mesh.bindposes = bp.ToArray();
             targetSkinnedMesh.sharedMesh = mesh;
 
-            targetSkinnedMesh.sharedMaterial = fromSkinnedMesh.material;
+            targetSkinnedMesh.sharedMaterial = fromSkinnedMesh.sharedMaterial;
 
             return mesh;
         }
