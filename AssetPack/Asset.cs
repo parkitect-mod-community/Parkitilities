@@ -16,7 +16,7 @@ namespace Parkitilities.AssetPack
         public string Guid;
         public string Name;
         public Parkitect.Mods.AssetPacks.AssetType Type { get; set; }
-        public bool LoadAsset { get; set; }
+        public bool LoadAsset { get; set; } = true;
 
         [JsonConverter(typeof(StringEnumConverter))]
         public AssetType TargetType { get; set; }
