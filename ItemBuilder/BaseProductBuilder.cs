@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Parkitilities.ShopBuilder
 {
@@ -92,7 +93,7 @@ namespace Parkitilities.ShopBuilder
         }
     }
 
-    public class BaseProductBuilder<TResult,TSelf> : BaseItemBuilder<BaseObjectContainer<TResult>, TResult, TSelf>
+    public class BaseProductBuilder<TResult,TSelf> : BaseItemBuilder<BaseObjectContainer<TResult>, TResult, TSelf>, IRecolorable<TSelf>
         where TResult : Product
         where TSelf : class
     {
@@ -134,5 +135,61 @@ namespace Parkitilities.ShopBuilder
             return builder;
         }
 
+        public TSelf CustomColor(Color c1)
+        {
+            CustomColor(new[] {c1});
+            return this as TSelf;
+        }
+
+        public TSelf CustomColor(Color c1, Color c2)
+        {
+
+            CustomColor(new[] {c1, c2});
+            return this as TSelf;
+        }
+
+        public TSelf CustomColor(Color c1, Color c2, Color c3)
+        {
+            CustomColor(new[] {c1, c2, c3});
+            return this as TSelf;
+        }
+
+        public TSelf CustomColor(Color c1, Color c2, Color c3, Color c4)
+        {
+            CustomColor(new[] {c1, c2, c3, c4});
+            return this as TSelf;
+        }
+
+        public TSelf CustomColor(Color[] colors)
+        {
+            if (colors.Length == 0)
+                return this as TSelf;
+
+            AddStep("CUSTOM_COLOR", (payload) =>
+            {
+                CustomColors customColors = payload.Go.GetComponent<CustomColors>();
+                if (customColors == null)
+                {
+                    customColors = payload.Go.AddComponent<CustomColors>();
+                }
+                customColors.setColors(colors);
+            });
+
+            return this as TSelf;
+        }
+
+        public TSelf DisableCustomColors()
+        {
+            RemoveAllStepsByTag("CUSTOM_COLOR");
+            AddStep("CUSTOM_COLOR",
+                (payload) =>
+                {
+                    foreach (var comp in payload.Go.GetComponents<CustomColors>())
+                    {
+                        Object.Destroy(comp);
+                    }
+                });
+            return this as TSelf;
+        }
     }
 }

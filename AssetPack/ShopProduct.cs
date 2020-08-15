@@ -65,6 +65,10 @@ namespace Parkitilities.AssetPack
         public string Guid { get; set; }
         public string TrashGuid { get; set; }
 
+        public int ColorCount { get; set; }
+        public bool HasCustomColors { get; set; }
+        public List<CustomColor> CustomColors { get; set; }
+
         //base
         public string Name { get; set; }
         public float Price { get; set; }

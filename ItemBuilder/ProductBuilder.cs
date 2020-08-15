@@ -2,9 +2,11 @@ using UnityEngine;
 
 namespace Parkitilities.ShopBuilder
 {
-    public class ProductBuilder<TResult> : BaseProductBuilder<TResult,ProductBuilder<TResult>>, IBuildable<TResult> where TResult : Product
+    public class ProductBuilder<TResult> : BaseProductBuilder<TResult, ProductBuilder<TResult>>, IBuildable<TResult>
+        where TResult : Product
     {
         private readonly GameObject _go;
+
         public ProductBuilder(GameObject go)
         {
             _go = go;

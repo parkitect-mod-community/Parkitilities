@@ -68,9 +68,10 @@ namespace Parkitilities
             Debug.Log("-------------------------------------------------------");
             foreach (var action in _actions)
             {
-                Debug.Log("Applying Action: " + action.Tag );
+                Debug.Log("Applying Action: " + action.Tag);
                 action.Handler(target);
             }
+
             Debug.Log("-------------------------------------------------------");
         }
     }
