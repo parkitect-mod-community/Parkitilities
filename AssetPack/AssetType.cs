@@ -15,6 +15,7 @@ namespace Parkitilities.AssetPack
         Train,
         Shop,
         Door,
+        Path,
         Generic
     }
 }

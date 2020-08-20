@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using Parkitilities.AssetPack;
 using Parkitilities.NPCBuilder;
+using Parkitilities.PathStylesBuilder;
 using Parkitilities.ShopBuilder;
 using UnityEngine;
 
@@ -185,6 +186,17 @@ namespace Parkitilities
         {
             return new CostumeBuilder();
         }
+        #endregion
+
+        #region Path
+
+
+        public static PathStyleBuilder PathStyle()
+        {
+            return new PathStyleBuilder();
+        }
+
+
         #endregion
 
         #region Utilities

@@ -61,7 +61,18 @@ namespace Parkitilities
 
         public static TResult LoadAsset<TResult>(AssetBundle bundle, string guid) where TResult : Object
         {
-            TResult result = bundle.LoadAsset<TResult>(string.Format("Assets/Resources/AssetPack/{0}.prefab", guid));
+            TResult result = null;
+            if (typeof(TResult) == typeof(Texture2D))
+            {
+                result =
+                    bundle.LoadAsset<TResult>(string.Format("Assets/Resources/AssetPack/{0}.png", guid));
+            }
+            else
+            {
+                result =
+                    bundle.LoadAsset<TResult>(string.Format("Assets/Resources/AssetPack/{0}.prefab", guid));
+            }
+
             if (result == null)
                 Debug.Log("Failed to load asset for: " + guid);
             return result;
