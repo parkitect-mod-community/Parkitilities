@@ -18,6 +18,7 @@ namespace Parkitilities
 
         public TResult Build(AssetManagerLoader loader)
         {
+
             GameObject go = UnityEngine.Object.Instantiate(_go);
             // existing Decos are not evaluated. Assumed to be configured correctly
             TResult deco = go.GetComponent<TResult>();

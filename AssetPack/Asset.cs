@@ -1,12 +1,17 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Parkitilities.PathStylesBuilder;
 
 namespace Parkitilities.AssetPack
 {
     public class Asset
     {
-        public bool Skip { get; set; }
+        public enum PathMaterial {
+            Tiled,
+            Sheet,
+            Custom
+        }
 
         public int FootprintX = 1;
         public int FootprintZ = 1;
@@ -57,5 +62,8 @@ namespace Parkitilities.AssetPack
         public List<Waypoint> Waypoints;
         public AspectRatio AspectRatio;
         public List<ShopProduct> Products = new List<ShopProduct>();
+
+        public PathMaterial PathMaterialType = PathMaterial.Tiled;
+        public PathStyleBuilder.PathType PathType = PathStyleBuilder.PathType.Normal;
     }
 }
