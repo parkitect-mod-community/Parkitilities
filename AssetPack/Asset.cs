@@ -13,7 +13,6 @@ namespace Parkitilities.AssetPack
             Custom
         }
 
-
         public int FootprintX = 1;
         public int FootprintZ = 1;
         public int DefaultTrainLength = 1;
@@ -66,7 +65,5 @@ namespace Parkitilities.AssetPack
 
         public PathMaterial PathMaterialType = PathMaterial.Tiled;
         public PathStyleBuilder.PathType PathType = PathStyleBuilder.PathType.Normal;
-
-
     }
 }

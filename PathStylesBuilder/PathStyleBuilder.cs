@@ -72,7 +72,7 @@ namespace Parkitilities.PathStylesBuilder
 
         public PathStyleBuilder Name(String name)
         {
-            AddStep("Id", target => target.name = name);
+            AddStep("Name", target => target.name = name);
             return this;
         }
 

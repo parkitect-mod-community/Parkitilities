@@ -23,19 +23,24 @@ namespace Parkitilities
         }
 
 
-        public static CustomColorsMaskedNormals PathMaterial()
+        public static CustomColorsMaskedNormalBuilder PathMaterial()
         {
-            return new CustomColorsMaskedNormals(Object.Instantiate(PathStyleBuilder.GetPathStyle(PathStyleBuilder.NormalPathIds.Gravel, PathStyleBuilder.PathType.Normal).material));
+            return new CustomColorsMaskedNormalBuilder(Object.Instantiate(PathStyleBuilder.GetPathStyle(PathStyleBuilder.NormalPathIds.Gravel, PathStyleBuilder.PathType.Normal).material));
         }
 
-        public static CustomColorsMaskedNormals PathMaterialTiled()
+        public static CustomColorMaskedCutoutBuilder PathMaterialTiled()
         {
-            return new CustomColorsMaskedNormals(Object.Instantiate(PathStyleBuilder.GetPathStyle(PathStyleBuilder.NormalPathIds.StoneBlock, PathStyleBuilder.PathType.Normal).material));
+            return new CustomColorMaskedCutoutBuilder(Object.Instantiate(PathStyleBuilder.GetPathStyle(PathStyleBuilder.NormalPathIds.StoneBlock, PathStyleBuilder.PathType.Normal).material));
         }
 
-        public static CustomColorsMaskedNormals CustomColorsMaskedNormal()
+        public static CustomColorsMaskedNormalBuilder CustomColorsMaskedNormal()
         {
-            return new CustomColorsMaskedNormals(new Material(Shader.Find(CustomColorsMaskedNormals.ShaderName)));
+            return new CustomColorsMaskedNormalBuilder(new Material(Shader.Find(CustomColorsMaskedNormalBuilder.ShaderName)));
+        }
+
+        public static CustomColorMaskedCutoutBuilder CustomColorMaskedCutout()
+        {
+            return new CustomColorMaskedCutoutBuilder(new Material(Shader.Find(CustomColorMaskedCutoutBuilder.ShaderName)));
         }
     }
 }

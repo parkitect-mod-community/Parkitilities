@@ -25,26 +25,31 @@ namespace Parkitilities
     // _SmudgesTextureScale ("Smudges Texture Scale", Float)
     // _SmudgesTriplanarBlendSharpness ("Smudges Blend Sharpness", Float)
     // _SmudgesPower ("Smudges Power", Range(0, 8))
-    public class CustomColorsMaskedNormals
+    public class CustomColorsMaskedNormalBuilder
     {
         private Material _material;
         public static readonly String ShaderName = "Rollercoaster/CustomColorsMaskedNormals";
 
-        public CustomColorsMaskedNormals(Material material)
+        public CustomColorsMaskedNormalBuilder(Material material)
         {
             _material = material;
         }
 
-        public CustomColorsMaskedNormals MainTex(Texture2D value)
+        public CustomColorsMaskedNormalBuilder MainTex(Texture2D value)
         {
-
             _material.SetTexture("_MainTex", value);
             return this;
         }
 
-        public CustomColorsMaskedNormals MaskTex(Texture2D value)
+        public CustomColorsMaskedNormalBuilder MaskTex(Texture2D value)
         {
             _material.SetTexture("_MaskTex", value);
+            return this;
+        }
+
+        public CustomColorsMaskedNormalBuilder NormalTex(Texture2D value)
+        {
+            _material.SetTexture("_NormalMap", value);
             return this;
         }
 
