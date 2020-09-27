@@ -126,7 +126,7 @@ namespace Parkitilities.ShopBuilder
 
         public ConsumableProductBuilder<TResult> TemperaturePreference(TemperaturePreference preference)
         {
-            AddStep("CONSUME_ANIMATION", (handler) => { handler.Target.temperaturePreference = preference; });
+            AddStep("TEMPERATURE_PREFERENCE", (handler) => { handler.Target.temperaturePreference = preference; });
             return this;
         }
 

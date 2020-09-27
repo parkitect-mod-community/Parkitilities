@@ -28,7 +28,8 @@ namespace Parkitilities.AssetPack
     {
         ON_GOING,
         CONSUMABLE,
-        WEARABLE
+        WEARABLE,
+        BALLOON
     }
 
     public enum Seasonal
@@ -98,6 +99,11 @@ namespace Parkitilities.AssetPack
         public float DisgustFactor = .5f;
         public float Volume = .1f;
         public bool CanWiggle = true;
+
+        //balloon
+        public float DefaultMass = 1.0f;
+        public float DefaultDrag = 0.0f;
+        public float DefaultAngularDrag = 0.05f;
     }
 
     public class ShopIngredient
@@ -123,6 +129,7 @@ namespace Parkitilities.AssetPack
             if (side == HandSide.LEFT) return Hand.Side.LEFT;
             return Hand.Side.RIGHT;
         }
+
 
         public static TemperaturePreference ConvertTemperaturePreference(Temperature temperature)
         {

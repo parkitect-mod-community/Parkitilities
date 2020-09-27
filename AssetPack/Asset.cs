@@ -7,11 +7,21 @@ namespace Parkitilities.AssetPack
 {
     public class Asset
     {
-        public enum PathMaterial {
+        public enum PathMaterial
+        {
             Tiled,
             Sheet,
             Custom
         }
+
+        public enum WalkableFlag
+        {
+            NOT_WALKABLE,
+            WALKABLE,
+            DIRECTIONAL,
+            FORWARD
+        }
+
 
         public int FootprintX = 1;
         public int FootprintZ = 1;
@@ -62,8 +72,28 @@ namespace Parkitilities.AssetPack
         public List<Waypoint> Waypoints;
         public AspectRatio AspectRatio;
         public List<ShopProduct> Products = new List<ShopProduct>();
+        public WalkableFlag Walkable = WalkableFlag.DIRECTIONAL;
 
         public PathMaterial PathMaterialType = PathMaterial.Tiled;
         public PathStyleBuilder.PathType PathType = PathStyleBuilder.PathType.Normal;
+
+
+        public static Block.WalkableFlagType ConvertWalkable(WalkableFlag walkable)
+        {
+            switch (walkable)
+            {
+                case WalkableFlag.NOT_WALKABLE:
+                    return Block.WalkableFlagType.NOT_WALKABLE;
+                case WalkableFlag.WALKABLE:
+                    return Block.WalkableFlagType.WALKABLE;
+                case WalkableFlag.DIRECTIONAL:
+                    return Block.WalkableFlagType.DIRECTIONAL;
+                case WalkableFlag.FORWARD:
+                    return Block.WalkableFlagType.FORWARD;
+            }
+
+            return Block.WalkableFlagType.DIRECTIONAL;
+        }
+
     }
 }

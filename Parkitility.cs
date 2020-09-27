@@ -102,6 +102,11 @@ namespace Parkitilities
             return new WearableProductBuilder<TItem>(go);
         }
 
+        public static BalloonProductBuilder<TItem> CreateBalloonProduct<TItem>(GameObject go) where TItem : Balloon
+        {
+            return new BalloonProductBuilder<TItem>(go);
+        }
+
         public static OngoingProductBuilder<TItem> CreateOnGoingProduct<TItem>(GameObject go) where TItem : OngoingEffectProduct
         {
             return new OngoingProductBuilder<TItem>(go);
